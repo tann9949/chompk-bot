@@ -1,8 +1,0 @@
-version: "0.1"
-
-services:
-  bot:
-    build: "telegram-bot"
-    image: "telegram-bot"
-    volumes:
-      - "../lib:/workspace"
