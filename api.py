@@ -1,10 +1,13 @@
-from datetime import datetime
 import json
+import time
+from datetime import datetime
 from typing import Any, Dict, List
 
+import numpy as np
 import pandas as pd
 import requests
 from requests.models import Response
+
 
 class BinanceAPI:
 
@@ -42,6 +45,60 @@ class BinanceAPI:
                 and "BULL" not in ticker["symbol"]
             )
         ]
+
+
+class CoinGecko:
+
+    base_url: str = "https://api.coingecko.com"
+
+    @staticmethod
+    def get_btc_dominance():
+        url: str = f"{CoinGecko.base_url}/api/v3/global"
+        response = requests.get(url)
+        data = json.loads(response.text)
+        return data["data"]["market_cap_percentage"]["btc"]
+
+
+class TheBlockAPI:
+
+    base_url: str = "https://data.tbstat.com"
+    headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
+            'sec-fetch-site': 'cross-site',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-dest': 'empty',
+            'referer': 'https://www.theblockcrypto.com/',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-ch-ua-mobile': '?0',
+            'authority': 'data.tbstat.com',
+            'accept-language': 'en-US,en;q=0.9\''
+        }
+
+    @staticmethod
+    def format_unix_time(unix_time: int) -> datetime:
+        return datetime.utcfromtimestamp(unix_time)
+
+    @staticmethod
+    def get_open_interset():
+        current_time: int = int(time.time())
+        url: str = f"{TheBlockAPI.base_url}/dashboard/markets_futures_aggregatedopeninterestofbitcoinfutures_daily_bybt.json?v={current_time}"
+        
+        response: Response = requests.get(
+            url,
+            headers=TheBlockAPI.headers,
+        )
+        data: Dict[str, Any] = json.loads(response.text)["Series"]
+
+        aggregated_oi = {}
+        for exchange, oi_data in data.items():
+            oi_data = pd.Series(
+                [d["Result"] for d in oi_data["Data"]],
+                index=[TheBlockAPI.format_unix_time(d["Timestamp"]) for d in oi_data["Data"]],
+                name=f"{exchange} Open Interest"
+            )
+            aggregated_oi[exchange] = oi_data
+
+        return aggregated_oi
 
 
 class FearAndGreedAPI:

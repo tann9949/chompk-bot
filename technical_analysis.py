@@ -7,6 +7,10 @@ import numpy as np
 class TechnicalAnalysis:
 
     @staticmethod
+    def sma(data: np.ndarray, period: int) -> np.ndarray:
+        return pd.Series(data).rolling(window=period).mean().fillna(0).values
+
+    @staticmethod
     def rma(data: np.ndarray, period: int) -> np.ndarray:
         alpha: float = 1 / period;
         prev_d_t: float = 0.

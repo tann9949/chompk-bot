@@ -2,6 +2,7 @@ import re
 from typing import Optional, Tuple
 
 import numpy as np
+import pandas as pd
 
 from technical_analysis import TechnicalAnalysis as ta
 
@@ -9,8 +10,27 @@ from technical_analysis import TechnicalAnalysis as ta
 class Solver:
 
     @staticmethod
+    def get_cdc_signal(src: pd.Serires) -> Optional[str]:
+        # Buy/Sell
+        fast_ema: np.ndarray = ta.ema(src.values, 12)
+        slow_ema: np.ndarray = ta.ema(src.values, 26)
+        ema_diff: float = fast_ema[-1] - slow_ema[-1]
+        current_price: float = src.values[-1]
+        prev_price: float = src.values[-2]
+
+        if current_price > 0 and prev_price < 0:  # cross over
+            return "buy"
+        elif current_price < 0 and prev_price > 0: # cross under
+            return "sell"
+        else:
+            return None
+
+        # Buymore sell more
+        # TODO:
+
+    @staticmethod
     def solve_cdc_cross(
-        data: np.ndarray,
+        src: pd.Series,
         max_trial: int = 100000) -> Tuple[Optional[float], str]:
         """
         Solve (brute force search) for EMA 12, EMA 26 
@@ -30,10 +50,10 @@ class Solver:
             EMA12, EMA26. If return None, solution cannot be found
             within given range of `delta` and `resolution`
         """
-        fast_ema: np.ndarray = ta.ema(data["close"].values, 12)
-        slow_ema: np.ndarray = ta.ema(data["close"].values, 26)
+        fast_ema: np.ndarray = ta.ema(src.values, 12)
+        slow_ema: np.ndarray = ta.ema(src.values, 26)
         ema_diff: float = fast_ema[-1] - slow_ema[-1]
-        current_price: float = data["close"].values[-1]
+        current_price: float = src.values[-1]
 
         assert current_price > 0
         if abs(current_price) >= 1:
@@ -59,8 +79,8 @@ class Solver:
                 template += "Could not solve for a solution!"
                 return template
             data.iloc[-1]["close"] = result_price
-            fast_ema: np.ndarray = ta.ema(data["close"].values, 12)
-            slow_ema: np.ndarray = ta.ema(data["close"].values, 26)
+            fast_ema: np.ndarray = ta.ema(src.values, 12)
+            slow_ema: np.ndarray = ta.ema(src.values, 26)
             diff: float = fast_ema[-1] - slow_ema[-1]
             # print(result_price, diff)
             if abs(diff) < abs(delta) / 10:

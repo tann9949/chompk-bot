@@ -19,9 +19,10 @@ def init_dotenv():
 def main():
     # load .env and unpack
     env = init_dotenv()
-    TOKEN = env["token"]
 
-    bot = Bot(TOKEN)
+    bot = Bot(
+        token=env["token"],
+    )
     bot.run()
 
 

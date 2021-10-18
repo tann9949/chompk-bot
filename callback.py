@@ -14,8 +14,8 @@ class CallBacks:
     def dashboard_callback(updater: Updater, context: CallbackContext) -> None:
         """
         TODO:
-        - Plot fear and greed + open interest + altcoin season index
-        - show value fear and greed, open interest, altcoin season index
+        - Plot fear and greed + open interest + altcoin season index + bitcoin dominance
+        - show value fear and greed, open interest, altcoin season index, bitcoin dominance
         - show Pairs that CDC Action zone will have buy/sell or buy more/sell more signal
         """
         pass
@@ -39,7 +39,7 @@ class CallBacks:
 
             try:
                 candle_data = BinanceAPI.generate_candle_data(symbol, interval)
-                _, template = Solver.solve_cdc_cross(candle_data)
+                _, template = Solver.solve_cdc_cross(candle_data["close"])
                 context.bot.send_message(
                     chat_id=update.effective_chat.id, 
                     text=template
