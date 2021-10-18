@@ -10,7 +10,7 @@ from bot import Bot
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
-def init_dotenv() -> Dict[str, Any]:
+def init_dotenv():
     load_dotenv()
 
     token = os.getenv("TOKEN", "TOKEN")
