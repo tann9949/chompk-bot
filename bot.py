@@ -5,11 +5,11 @@ from telegram.ext import (
     Updater, 
     CallbackContext,
     Dispatcher,
+    CommandHandler
 )
 from telegram.ext.filters import Filters
 from telegram.ext.messagehandler import MessageHandler
 
-from api import ByBt
 from callback import CallBacks
 
 
@@ -23,12 +23,18 @@ class Bot:
         dispatcher: Dispatcher = updater.dispatcher
 
         dispatcher.add_handler(
-            MessageHandler(
-                Filters.text,
-                Bot.reminder,
-                pass_job_queue=True
+            CommandHandler(
+                "dashboard",
+                CallBacks.dashboard_callback
             )
         )
+        # dispatcher.add_handler(
+        #     MessageHandler(
+        #         Filters.text,
+        #         Bot.reminder,
+        #         pass_job_queue=True
+        #     )
+        # )
 
         updater.start_polling()
         updater.idle()
@@ -39,5 +45,6 @@ class Bot:
             CallBacks.dashboard_callback,
             context=update.effective.chat_id,
             days=(0, 1, 2, 3, 4, 5, 6),  # run everyday
-            time=time(hour=6, minute=55, second=0)  # send at 6:55 as market close at 7:00
+            # time=time(hour=6, minute=55, second=0)  # send at 6:55 as market close at 7:00
+            time=time(hour=17, minute=18, second=0)
         )

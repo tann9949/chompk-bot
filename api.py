@@ -1,10 +1,9 @@
 import json
 import re
 import time
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any, Dict, List
 
-import numpy as np
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -23,7 +22,7 @@ class BinanceAPI:
         klines = json.loads(r.text)
         candle_data = []
         for l in klines:
-            assert len(l) == 12, len(l)
+            assert len(l) == 12, f"{symbol}: {len(l)}"
             open_time, end_time = l[0], l[6]
             volume = l[5]
             high, low, op, close = l[2], l[3], l[1], l[4]
@@ -45,6 +44,7 @@ class BinanceAPI:
                 and "DOWN" not in ticker["symbol"]
                 and "BEAR" not in ticker["symbol"]
                 and "BULL" not in ticker["symbol"]
+                and ticker["symbol"].count("USD") == 1
             )
         ]
 

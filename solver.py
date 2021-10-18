@@ -10,17 +10,16 @@ from technical_analysis import TechnicalAnalysis as ta
 class Solver:
 
     @staticmethod
-    def get_cdc_signal(src: pd.Serires) -> Optional[str]:
+    def get_cdc_signal(src: pd.Series) -> Optional[str]:
         # Buy/Sell
         fast_ema: np.ndarray = ta.ema(src.values, 12)
         slow_ema: np.ndarray = ta.ema(src.values, 26)
-        ema_diff: float = fast_ema[-1] - slow_ema[-1]
-        current_price: float = src.values[-1]
-        prev_price: float = src.values[-2]
+        current_diff: float = fast_ema[-1] - slow_ema[-1]
+        prev_diff: float = fast_ema[-2] - slow_ema[-2]
 
-        if current_price > 0 and prev_price < 0:  # cross over
+        if current_diff > 0 and prev_diff < 0:  # cross over
             return "buy"
-        elif current_price < 0 and prev_price > 0: # cross under
+        elif current_diff < 0 and prev_diff > 0: # cross under
             return "sell"
         else:
             return None
