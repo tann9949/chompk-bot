@@ -8,7 +8,7 @@ class TechnicalAnalysis:
 
     @staticmethod
     def sma(data: np.ndarray, period: int) -> np.ndarray:
-        return pd.Series(data).rolling(window=period).mean().fillna(0).values
+        return pd.Series(data).rolling(window=period).mean().values
 
     @staticmethod
     def rma(data: np.ndarray, period: int) -> np.ndarray:
@@ -63,5 +63,31 @@ class TechnicalAnalysis:
 
     @staticmethod
     def stoch(src: pd.Series, high: pd.Series, low: pd.Series, length: int) -> np.ndarray:
-        # TODO:
-        pass
+        high_pad: np.ndarray = np.concatenate(
+            (np.zeros(length), high)
+        );
+        low_pad: np.ndarray = np.concatenate(
+            (np.zeros(length), low)
+        );
+        src_pad: np.ndarray = np.concatenate(
+            (np.zeros(length), src)
+        );
+
+        assert len(src) == len(high), len(low)
+        stoch: List[float] = []
+        i: int = 0
+        while i <= len(src):
+            src_window: np.ndarray = src_pad[i:i+length]
+            high_window: np.ndarray = high_pad[i:i+length]
+            low_window: np.ndarray = low_pad[i:i+length]
+            assert len(src_window) == length
+
+            close: float = src_window[-1]
+            highest: float = high_window.max()
+            lowest: float = low_window.min()
+            # print(close, highest, lowest)
+            stoch.append(
+                100 * (close - lowest) / (highest - lowest)
+            )
+            i += 1
+        return np.array(stoch)

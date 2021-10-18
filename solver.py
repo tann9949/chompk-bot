@@ -21,11 +21,21 @@ class Solver:
             return "buy"
         elif current_diff < 0 and prev_diff > 0: # cross under
             return "sell"
-        else:
-            return None
 
         # Buymore sell more
-        # TODO:
+        rsi = ta.rsi(src, 14)
+        stoch_rsi = ta.stoch(rsi, rsi, rsi, 14)
+        k = ta.sma(stoch_rsi, 3)
+        d = ta.sma(k, 3)
+        current_kd_diff = k[-1] - d[-1]
+        prev_kd_diff = k[-2] - d[-2]
+
+        if current_kd_diff > 0 and prev_kd_diff < 0 and k[-1] < 30 and current_diff > 0:  # cross over
+            return "buy more"
+        elif current_kd_diff < 0 and prev_kd_diff > 0 and k[-1] > 70 and current_diff < 0: # cross under
+            return "sell more"
+        else:
+            return None
 
     @staticmethod
     def solve_cdc_cross(

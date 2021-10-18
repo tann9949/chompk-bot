@@ -60,7 +60,12 @@ class CallBacks:
             "Buy Next Bar 🟢\n" + \
             f"{' '.join(buy_tickers)}\n\n" + \
             "Sell Next Bar 🔴\n" + \
-            f"{' '.join(sell_tickers)}\n\n"
+            f"{' '.join(sell_tickers)}\n\n" + \
+            "Buy More Next Bar 🔼\n" + \
+            f"{' '.join(buymore_tickers)}\n\n" + \
+            "Sell More Next Bar 🔽\n" + \
+            f"{' '.join(sellmore_tickers)}\n\n"
+            
         
         aggregated_oi: np.ndarray = np.array([
             x.values 
