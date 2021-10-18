@@ -1,11 +1,13 @@
 import json
+import re
 import time
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
 from requests.models import Response
 
 
@@ -99,6 +101,30 @@ class TheBlockAPI:
             aggregated_oi[exchange] = oi_data
 
         return aggregated_oi
+
+
+class AltcoinIndexAPI:
+
+    api_url: str = "https://www.blockchaincenter.net/altcoin-season-index/"
+
+    @staticmethod
+    def get_historical_altcoin_index():
+        soup: BeautifulSoup = BeautifulSoup(
+            requests.get(AltcoinIndexAPI.api_url).text,
+            "html.parser"
+        )
+        for sc in soup.find_all("script"):
+            if len(sc) != 1:
+                continue
+            if "var chartdata" in sc.contents[0]:
+                break
+        chart_data = json.loads(re.findall(r'chartdata = \{.+\}', sc.contents[0])[0].replace("chartdata = ", ""))
+        timestamp = [
+            datetime.strptime(t, "%Y-%m-%d")
+            for t in chart_data["labels"]["year"]
+        ]
+        value = chart_data["values"]["year"]
+        return pd.Series(value, index=timestamp, name="Altcoin Season Index")
 
 
 class FearAndGreedAPI:
