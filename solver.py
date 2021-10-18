@@ -78,7 +78,7 @@ class Solver:
             if result_price < 0. or n_trial > max_trial:
                 template += "Could not solve for a solution!"
                 return template
-            data.iloc[-1]["close"] = result_price
+            src.iloc[-1] = result_price
             fast_ema: np.ndarray = ta.ema(src.values, 12)
             slow_ema: np.ndarray = ta.ema(src.values, 26)
             diff: float = fast_ema[-1] - slow_ema[-1]
