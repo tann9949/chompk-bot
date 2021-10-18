@@ -20,32 +20,30 @@ class CallBacks:
     @staticmethod
     def dashboard_callback(update: Updater, context: CallbackContext) -> None:
         """
-        TODO:
         - Plot fear and greed + open interest + altcoin season index + bitcoin dominance
         - show value fear and greed, open interest, altcoin season index, bitcoin dominance
         - show Pairs that CDC Action zone will have buy/sell or buy more/sell more signal
         """
         logging.info("Calling Dashboard callbacks")
         usdt_tickers = BinanceAPI.get_usdt_tickers()
-        # usdt_tickers = ["SKLUSDT", "EOSUSDT"]
 
         buy_tickers = []
         sell_tickers = []
         buymore_tickers = []
         sellmore_tickers = []
-        # for ticker in usdt_tickers:
-        #     candle_data = BinanceAPI.generate_candle_data(ticker)
-        #     signal = Solver.get_cdc_signal(candle_data["close"])
-        #     logging.info(f"Ticker ({ticker}) is {signal}")
+        for ticker in usdt_tickers:
+            candle_data = BinanceAPI.generate_candle_data(ticker)
+            signal = Solver.get_cdc_signal(candle_data["close"])
+            logging.info(f"Ticker ({ticker}) is {signal}")
 
-        #     if signal == "buy":
-        #         buy_tickers.append(ticker)
-        #     elif signal == "sell":
-        #         sell_tickers.append(ticker)
-        #     elif signal == "buy more":
-        #         buymore_tickers.append(ticker)
-        #     elif signal == "sell more":
-        #         sellmore_tickers.append(ticker)
+            if signal == "buy":
+                buy_tickers.append(ticker)
+            elif signal == "sell":
+                sell_tickers.append(ticker)
+            elif signal == "buy more":
+                buymore_tickers.append(ticker)
+            elif signal == "sell more":
+                sellmore_tickers.append(ticker)
 
         btc_dominance: float = CoinGecko.get_btc_dominance()
         logging.info("Fetching BTC Price...")
