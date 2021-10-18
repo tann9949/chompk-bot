@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from indicator import Indicator
+from technical_analysis import TechnicalAnalysis as ta
 
 
 class Solver:
@@ -30,8 +30,8 @@ class Solver:
             EMA12, EMA26. If return None, solution cannot be found
             within given range of `delta` and `resolution`
         """
-        fast_ema: np.ndarray = Indicator.ema(data["close"].values, 12)
-        slow_ema: np.ndarray = Indicator.ema(data["close"].values, 26)
+        fast_ema: np.ndarray = ta.ema(data["close"].values, 12)
+        slow_ema: np.ndarray = ta.ema(data["close"].values, 26)
         ema_diff: float = fast_ema[-1] - slow_ema[-1]
         current_price: float = data["close"].values[-1]
 
@@ -59,8 +59,8 @@ class Solver:
                 template += "Could not solve for a solution!"
                 return template
             data.iloc[-1]["close"] = result_price
-            fast_ema: np.ndarray = Indicator.ema(data["close"].values, 12)
-            slow_ema: np.ndarray = Indicator.ema(data["close"].values, 26)
+            fast_ema: np.ndarray = ta.ema(data["close"].values, 12)
+            slow_ema: np.ndarray = ta.ema(data["close"].values, 26)
             diff: float = fast_ema[-1] - slow_ema[-1]
             # print(result_price, diff)
             if abs(diff) < abs(delta) / 10:

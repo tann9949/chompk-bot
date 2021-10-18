@@ -1,5 +1,4 @@
 import logging
-from datetime import time
 
 from telegram.ext import (
     Updater, 
@@ -14,9 +13,10 @@ class CallBacks:
     @staticmethod
     def dashboard_callback(updater: Updater, context: CallbackContext) -> None:
         """
+        TODO:
         - Plot fear and greed + open interest + altcoin season index
         - show value fear and greed, open interest, altcoin season index
-        - show
+        - show Pairs that CDC Action zone will have buy/sell or buy more/sell more signal
         """
         pass
 
