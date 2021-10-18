@@ -15,19 +15,26 @@ class BinanceAPI:
     base_url: str = "https://api.binance.com"
 
     @staticmethod
+    def format_unixtime(unix_time: int):
+        return datetime.utcfromtimestamp(int(str(unix_time)[:-3]))
+
+    @staticmethod
     def generate_candle_data(
         symbol: str, 
         interval: str = "1d") -> pd.DataFrame:
         r = requests.get(f"{BinanceAPI.base_url}/api/v3/klines", {"symbol": symbol, "interval": interval})
         klines = json.loads(r.text)
         candle_data = []
+        timestamp = []
         for l in klines:
             assert len(l) == 12, f"{symbol}: {len(l)}"
-            open_time, end_time = l[0], l[6]
+            open_time = BinanceAPI.format_unixtime(l[0])
+            timestamp.append(open_time)
+            # end_time = datetime.utcfromtimestamp(l[6])
             volume = l[5]
             high, low, op, close = l[2], l[3], l[1], l[4]
             candle_data.append([op, close, high, low, volume])
-        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"])
+        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
         return candle_data.astype(float)
 
     @staticmethod
@@ -123,7 +130,7 @@ class AltcoinIndexAPI:
             datetime.strptime(t, "%Y-%m-%d")
             for t in chart_data["labels"]["year"]
         ]
-        value = chart_data["values"]["year"]
+        value = [int(v) for v in chart_data["values"]["year"]]
         return pd.Series(value, index=timestamp, name="Altcoin Season Index")
 
 
@@ -132,7 +139,7 @@ class FearAndGreedAPI:
     api_url: str = "https://alternative.me/api/crypto/fear-and-greed-index/history";
 
     @staticmethod
-    def get_historical_data(days: int = 30) -> pd.DataFrame:
+    def get_historical_data(days: int = 300) -> pd.DataFrame:
         response: Response = requests.post(
             FearAndGreedAPI.api_url,
             data=json.dumps({
