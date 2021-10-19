@@ -36,15 +36,21 @@ class OkexAPI:
         pass
 
     def get_btc_tickers() -> List[str]:
-        """
-        Get XXXBTC Tickers from Okex pairs
-
-        Return
-        ------
-        List of tickers to query api in `generate_candle_data`
-        """
-        # implement code here
-        pass
+        r = requests.get(f"{Okex.base_url}/api/spot/v3/instruments/ticker")
+        tickers = json.loads(r.text)
+        return [
+            ticker["instrument_id"]
+            for ticker in tickers
+            if (
+                ticker["instrument_id"][:3] != "BTC"
+                and "USD" not in ticker["instrument_id"] 
+                and "BTC" in ticker["instrument_id"]
+                and "DOWN" not in ticker["instrument_id"]
+                and "BEAR" not in ticker["instrument_id"]
+                and "BULL" not in ticker["instrument_id"]
+                and "DAI" not in ticker["instrument_id"]
+            )
+        ]
 
 
 class BinanceAPI:
