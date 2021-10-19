@@ -12,39 +12,39 @@ from requests.models import Response
 
 class OkexAPI:
 
-    base_url: str = ""
+    base_url: str = "https://www.okex.com"
 
     @staticmethod
-    def generate_candle_data(symbol: str, interval: str = "1d") -> pd.DataFrame:
-        """
-        Load candle data in dataframe format
-
-        Argument
-        --------
-        symbol (str)
-            pair name to query api (e.g. ETHBTC, BNBBTC, etc.)
-        interval (str)
-            interval to query api (e.g. 1d, 4h, etc.)
-
-        Return
-        ------
-        candle_data: pd.DataFrame
-            Candle data that must contains ["open", "close", "high", "low"]
-            as columns. "volume" is optional.
-        """
-        # Implement code here
-        pass
+    def generate_candle_data(instrument_id: str) -> pd.DataFrame:
+        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles")
+        klines = json.loads(r.text)
+        candle_data = []
+        timestamp = []
+        for l in klines:
+            open_time = l[0]
+            timestamp.append(open_time)
+            volume = l[5]
+            high, low, op, close = l[2], l[3], l[1], l[4]
+            candle_data.append([op, close, high, low, volume])
+        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
+        return candle_data
 
     def get_btc_tickers() -> List[str]:
-        """
-        Get XXXBTC Tickers from Okex pairs
-
-        Return
-        ------
-        List of tickers to query api in `generate_candle_data`
-        """
-        # implement code here
-        pass
+        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
+        tickers = json.loads(r.text)
+        return [
+            ticker["instrument_id"]
+            for ticker in tickers
+            if (
+                ticker["instrument_id"][:3] != "BTC"
+                and "USD" not in ticker["instrument_id"] 
+                and "BTC" in ticker["instrument_id"]
+                and "DOWN" not in ticker["instrument_id"]
+                and "BEAR" not in ticker["instrument_id"]
+                and "BULL" not in ticker["instrument_id"]
+                and "DAI" not in ticker["instrument_id"]
+            )
+        ]
 
 
 class BinanceAPI:
