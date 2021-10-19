@@ -32,18 +32,12 @@ class CallBacks:
         chat_id: str = update.effective_chat.id if chat_id is None else chat_id
         
         current_time: str = f"{datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-        cdc_template = get_cdc_tickers()
         btc_template = get_bitcion_template(img_path)
 
         send_message(
             chat_id,
             context,
             message=current_time
-        )
-        send_message(
-            chat_id,
-            context,
-            message=cdc_template
         )
         send_photo(
             chat_id,
@@ -59,6 +53,29 @@ class CallBacks:
 
     @staticmethod
     def cdc_callback(update: Updater, context: CallbackContext) -> None:
+        args = context.args
+        if len(args) == 0:
+            pair = "usdt"
+        else:
+            pair = args[0].lower().strip()
+        if pair not in ["usdt", "btc"]:
+            send_message(update.effective_chat.id, context, f"Unrecognized argument: {pair}. Only usdt|btc available")
+
+        
+        send_message(
+            update.effective_chat.id,
+            context,
+            message=f"Computing XXX{pair.upper()} pairs. This could take a few minutes 🙇‍♂️ ..."
+        )
+        template = get_cdc_tickers(pair)
+        send_message(
+            update.effective_chat.id,
+            context,
+            message=template
+        )
+
+    @staticmethod
+    def solve_cdc_callback(update: Updater, context: CallbackContext) -> None:
         args = context.args
 
         if len(args) > 1:
@@ -104,15 +121,22 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
     ]
     for i, (col, color) in enumerate(iterator):
         axs[i].plot(data.index, data[col].values, label=col, color=color)
+        latest_value = None
+        for d in data[col].values[::-1]:
+            if d == d:
+                latest_value = d
+                break
+        axs[i].axhline(latest_value, linestyle="--", alpha=0.4, color="black")
         axs[i].get_yaxis().set_major_formatter(
             FuncFormatter(lambda x, p: format(int(x), ','))
         )
         
         ax2 = axs[i].twinx()
         if i == 0:
-            ax2.plot(data.index, data["close"].values, color="orange", alpha=0.7, label="BTCUSDT")
+            ax2.plot(data.index, data["close"].values, color="orange", alpha=0.7, label="BTCUSDT (close)")
         else:
             ax2.plot(data.index, data["close"].values, color="orange", alpha=0.7)
+        ax2.axhline(data["close"].values[-1], linestyle="--", alpha=0.2, color="brown")
         ax2.get_yaxis().set_major_formatter(
             FuncFormatter(lambda x, p: format(int(x), ','))
         )
@@ -123,14 +147,14 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
     plt.savefig(save_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-def get_cdc_tickers() -> str:
-    usdt_tickers = BinanceAPI.get_usdt_tickers()
+def get_cdc_tickers(pair: str = "usdt") -> str:
+    tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
 
     buy_tickers = []
     sell_tickers = []
     buymore_tickers = []
     sellmore_tickers = []
-    for ticker in usdt_tickers:
+    for ticker in tickers:
         candle_data = BinanceAPI.generate_candle_data(ticker)
         signal = Solver.get_cdc_signal(candle_data["close"])
         logging.info(f"Ticker ({ticker}) is {signal}")

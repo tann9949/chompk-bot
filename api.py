@@ -10,6 +10,43 @@ from bs4 import BeautifulSoup
 from requests.models import Response
 
 
+class OkexAPI:
+
+    base_url: str = ""
+
+    @staticmethod
+    def generate_candle_data(symbol: str, interval: str = "1d") -> pd.DataFrame:
+        """
+        Load candle data in dataframe format
+
+        Argument
+        --------
+        symbol (str)
+            pair name to query api (e.g. ETHBTC, BNBBTC, etc.)
+        interval (str)
+            interval to query api (e.g. 1d, 4h, etc.)
+
+        Return
+        ------
+        candle_data: pd.DataFrame
+            Candle data that must contains ["open", "close", "high", "low"]
+            as columns. "volume" is optional.
+        """
+        # Implement code here
+        pass
+
+    def get_btc_tickers() -> List[str]:
+        """
+        Get XXXBTC Tickers from Okex pairs
+
+        Return
+        ------
+        List of tickers to query api in `generate_candle_data`
+        """
+        # implement code here
+        pass
+
+
 class BinanceAPI:
 
     base_url: str = "https://api.binance.com"
@@ -52,6 +89,24 @@ class BinanceAPI:
                 and "BEAR" not in ticker["symbol"]
                 and "BULL" not in ticker["symbol"]
                 and ticker["symbol"].count("USD") == 1
+                and "DAI" not in ticker["symbol"]
+            )
+        ]
+
+    @staticmethod
+    def get_btc_tickers() -> List[str]:
+        r = requests.get(f"{BinanceAPI.base_url}/api/v3/ticker/price")
+        tickers = json.loads(r.text)
+        return [
+            ticker["symbol"]
+            for ticker in tickers
+            if (
+                ticker["symbol"][:3] != "BTC"
+                and "USD" not in ticker["symbol"] 
+                and "BTC" in ticker["symbol"]
+                and "DOWN" not in ticker["symbol"]
+                and "BEAR" not in ticker["symbol"]
+                and "BULL" not in ticker["symbol"]
                 and "DAI" not in ticker["symbol"]
             )
         ]

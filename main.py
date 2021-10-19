@@ -22,8 +22,8 @@ def main():
     env = init_dotenv()
 
     bot = Bot(token=env["token"])
-    bot.send_message_to_chat(env["chat_id"])  # to directly send to chat
-    # bot.run()  # for listening to /dashboard
+    # bot.send_message_to_chat(env["chat_id"])  # to directly send to chat
+    bot.run()  # for listening to /dashboard
 
 
 if __name__ == "__main__":
