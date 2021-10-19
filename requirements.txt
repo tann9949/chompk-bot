@@ -1,7 +1,7 @@
+python-telegram-bot
 matplotlib
 numpy
 pandas
 requests
 python-dotenv
 bs4
-# python-telegrem-bot

@@ -52,6 +52,7 @@ class BinanceAPI:
                 and "BEAR" not in ticker["symbol"]
                 and "BULL" not in ticker["symbol"]
                 and ticker["symbol"].count("USD") == 1
+                and "DAI" not in ticker["symbol"]
             )
         ]
 
