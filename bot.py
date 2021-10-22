@@ -1,21 +1,14 @@
 import logging
-from datetime import datetime
 import os
-import telegram
+from datetime import datetime
+from functools import partial
 
-from telegram.ext import (
-    Updater, 
-    Dispatcher,
-    CommandHandler
-)
+import telegram
+from telegram.ext import CommandHandler, Dispatcher, Updater
 from telegram.ext.filters import Filters
 from telegram.ext.messagehandler import MessageHandler
 
-from callback import (
-    CallBacks,
-    get_bitcion_template,
-    get_cdc_tickers
-)
+from callback import CallBacks, get_bitcion_template, get_cdc_tickers
 
 
 class Bot:
@@ -51,6 +44,18 @@ class Bot:
             CommandHandler(
                 "cdc",
                 CallBacks.cdc_callback
+            )
+        )
+        dispatcher.add_handler(
+            CommandHandler(
+                "cdcaction",
+                partial(CallBacks.cdc_callback, current=False)
+            )
+        )
+        dispatcher.add_handler(
+            CommandHandler(
+                "open_interest",
+                partial(CallBacks.open_interest_callback)
             )
         )
 

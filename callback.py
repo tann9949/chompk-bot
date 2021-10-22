@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 import os
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,8 +9,8 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI,
-                 TheBlockAPI)
+from api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, OkexAPI,
+                 TheBlockAPI, ByBtAPI)
 from solver import Solver
 from technical_analysis import TechnicalAnalysis as ta
 from utils import send_message, send_photo
@@ -52,7 +52,61 @@ class CallBacks:
         os.remove(img_path)
 
     @staticmethod
-    def cdc_callback(update: Updater, context: CallbackContext) -> None:
+    def open_interest_callback(
+        update: Updater,
+        context: CallbackContext,
+        img_path: str = "oi.png",
+    ) -> None:
+        args: List[str] = context.args
+        if len(args) != 1:
+            send_message(update.effective_chat.id, context, "Please parse exchange as an argument!")
+            return
+
+        exchange: str = args[0].lower().strip()
+        oi_data: Dict[str, pd.Series] = ByBtAPI.get_open_interest()
+        if exchange not in oi_data.keys():
+            send_message(update.effective_chat.id, context, f"Unrecognize exchange: {exchange}")
+            return
+        oi: pd.Series = oi_data[exchange][-300:]
+        
+        logging.info(f"Calling Open Interest Callback on {exchange}")
+
+        # format text
+        oi_gain: float = (oi[-1] - oi[-2]) / oi[-2]
+        oi_gain_fmt: str = f"+{oi_gain*100:.2f}" if oi_gain > 0 else f"{oi_gain*100:.2f}"
+
+        exchange = exchange[0].upper() + exchange[1:]
+        template = f"💰 {exchange} Future Open Interest:\n" + \
+        f"    ${oi[-1]:,} ({oi_gain_fmt}%)\n\n"
+
+        # format image
+        btcusdt: pd.Series = BinanceAPI.generate_candle_data("BTCUSDT")["close"][-300:]
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        ax.plot(oi.index, oi.values)
+        ax.axhline(oi[-1], linestyle="--", alpha=0.4, color="black", label="Future Open Interest (USD)")
+        ax.get_yaxis().set_major_formatter(
+            FuncFormatter(lambda x, p: format(int(x), ','))
+        )
+
+        ax2 = ax.twinx()
+        ax2.plot(btcusdt.index, btcusdt.values, color="orange", alpha=0.7, label="BTCUSDT (close)")
+        ax2.axhline(btcusdt.values[-1], linestyle="--", alpha=0.2, color="brown")
+        ax2.get_yaxis().set_major_formatter(
+            FuncFormatter(lambda x, p: format(int(x), ','))
+        )
+
+        ax.label_outer()
+        fig.suptitle(f'{exchange} Open Interest', fontweight="bold", fontsize=24)
+        lgd = fig.legend()
+        plt.savefig(img_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
+
+        send_photo(update.effective_chat.id, context, img_path)
+        send_message(update.effective_chat.id, context, template)
+        os.remove(img_path)
+
+    @staticmethod
+    def cdc_callback(update: Updater, context: CallbackContext, current: bool = True) -> None:
         args = context.args
         if len(args) == 0:
             pair = "usdt"
@@ -60,6 +114,7 @@ class CallBacks:
             pair = args[0].lower().strip()
         if pair not in ["usdt", "btc"]:
             send_message(update.effective_chat.id, context, f"Unrecognized argument: {pair}. Only usdt|btc available")
+            return
 
         
         send_message(
@@ -67,12 +122,19 @@ class CallBacks:
             context,
             message=f"Computing XXX{pair.upper()} pairs. This could take a few minutes 🙇‍♂️ ..."
         )
-        template = get_cdc_tickers(pair)
+        template = get_cdc_tickers(pair, current=current)
         send_message(
             update.effective_chat.id,
             context,
             message=template
         )
+        if pair == "btc":
+            template = get_cdc_tickers(pair, "okex", current)
+            send_message(
+                update.effective_chat.id,
+                context,
+                message=template
+            )
 
     @staticmethod
     def solve_cdc_callback(update: Updater, context: CallbackContext) -> None:
@@ -147,16 +209,28 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
     plt.savefig(save_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-def get_cdc_tickers(pair: str = "usdt") -> str:
-    tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
+def get_cdc_tickers(
+    pair: str = "usdt", 
+    exchange: str = "binance",
+    current: bool = True) -> str:
+    if exchange == "okex" and pair == "btc":
+        tickers = OkexAPI.get_btc_tickers()
+    else:
+        tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
+
+
 
     buy_tickers = []
     sell_tickers = []
     buymore_tickers = []
     sellmore_tickers = []
     for ticker in tickers:
-        candle_data = BinanceAPI.generate_candle_data(ticker)
-        signal = Solver.get_cdc_signal(candle_data["close"])
+        if exchange == "okex":
+            candle_data = OkexAPI.generate_candle_data(ticker)
+        else:
+            candle_data = BinanceAPI.generate_candle_data(ticker)
+
+        signal = Solver.get_cdc_signal(candle_data["close"], current=current)
         logging.info(f"Ticker ({ticker}) is {signal}")
 
         if signal == "buy":
@@ -168,7 +242,8 @@ def get_cdc_tickers(pair: str = "usdt") -> str:
         elif signal == "sell more":
             sellmore_tickers.append(ticker)
 
-    cdc_template: str = f"CDC Action Zone V3 \n\n" + \
+    cdc_template: str = f"[{exchange.upper()}]\n" + \
+        f"CDC Action Zone V3 \n\n" + \
         "Buy Next Bar 🟢\n" + \
         f"{' '.join(buy_tickers)}\n\n" + \
         "Sell Next Bar 🔴\n" + \
@@ -186,7 +261,7 @@ def get_bitcion_template(img_path: str) -> str:
     logging.info("Fetching BTC Price...")
     btcusdt: pd.DataFrame = BinanceAPI.generate_candle_data("BTCUSDT")
     logging.info("Fetching Altcoin Index...")
-    oi: Dict[str, pd.Series] = TheBlockAPI.get_open_interset()
+    oi: Dict[str, pd.Series] = ByBtAPI.get_open_interest()
     logging.info("Fetching Fear and Greed Index...")
     altcoin_idx: pd.Series = AltcoinIndexAPI.get_historical_altcoin_index()
     logging.info("Fetching Bitcoin Aggregated Open Interest...")
@@ -199,7 +274,7 @@ def get_bitcion_template(img_path: str) -> str:
             x.resample("1D").mean().values 
             for x in oi.values()
         ]).sum(0),
-        index=oi["Binance"].resample("1D").mean().index,
+        index=oi["binance"].resample("1D").mean().index,
         name="Aggregated Open Interest"
     )
 
