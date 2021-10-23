@@ -10,12 +10,21 @@ from technical_analysis import TechnicalAnalysis as ta
 class Solver:
 
     @staticmethod
-    def get_cdc_signal(src: pd.Series) -> Optional[str]:
+    def get_cdc_signal(src: pd.Series, current: bool = True) -> Optional[str]:
+        curr_idx = -1
+        prev_idx = -2
+        if not current:
+            curr_idx -= 1
+            prev_idx -= 1
+            
         # Buy/Sell
+        if len(src) < 30:
+            return None
+        
         fast_ema: np.ndarray = ta.ema(src.values, 12)
         slow_ema: np.ndarray = ta.ema(src.values, 26)
-        current_diff: float = fast_ema[-1] - slow_ema[-1]
-        prev_diff: float = fast_ema[-2] - slow_ema[-2]
+        current_diff: float = fast_ema[curr_idx] - slow_ema[curr_idx]
+        prev_diff: float = fast_ema[prev_idx] - slow_ema[prev_idx]
 
         if current_diff > 0 and prev_diff < 0:  # cross over
             return "buy"
@@ -27,15 +36,18 @@ class Solver:
         stoch_rsi = ta.stoch(rsi, rsi, rsi, 14)
         k = ta.sma(stoch_rsi, 3)
         d = ta.sma(k, 3)
-        current_kd_diff = k[-1] - d[-1]
-        prev_kd_diff = k[-2] - d[-2]
+        current_kd_diff = k[curr_idx] - d[curr_idx]
+        prev_kd_diff = k[prev_idx] - d[prev_idx]
 
         if current_kd_diff > 0 and prev_kd_diff < 0 and k[-1] < 30 and current_diff > 0:  # cross over
             return "buy more"
         elif current_kd_diff < 0 and prev_kd_diff > 0 and k[-1] > 70 and current_diff < 0: # cross under
             return "sell more"
         else:
-            return None
+            if current_diff > 0:
+                return "bullish"
+            else:
+                return "bearish"
 
     @staticmethod
     def solve_cdc_cross(

@@ -1,5 +1,6 @@
 import json
 import re
+import os
 import time
 from datetime import datetime
 from typing import Any, Dict, List
@@ -13,21 +14,34 @@ from requests.models import Response
 class OkexAPI:
 
     base_url: str = "https://www.okex.com"
+    gran_mapping: Dict[str, int] = {
+        "15min": 900,
+        "30min": 1800,
+        "1h": 3600,
+        "4h": 14400,
+        "12h": 43200,
+        "1d": 86400,
+        "1W": 604800,
+        "1M": 2678400
+    }
 
     @staticmethod
-    def generate_candle_data(instrument_id: str) -> pd.DataFrame:
-        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles")
+    def generate_candle_data(
+        instrument_id: str,
+        granularity: str = "1d") -> pd.DataFrame:
+        timeframe = OkexAPI.gran_mapping[granularity]
+        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles?granularity={timeframe}")
         klines = json.loads(r.text)
         candle_data = []
         timestamp = []
         for l in klines:
-            open_time = l[0]
+            open_time = datetime.strptime(l[0], "%Y-%m-%dT%H:%M:%S.000Z")
             timestamp.append(open_time)
             volume = l[5]
             high, low, op, close = l[2], l[3], l[1], l[4]
             candle_data.append([op, close, high, low, volume])
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
-        return candle_data
+        return candle_data.astype(float).resample("1D").mean()
 
     def get_btc_tickers() -> List[str]:
         r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
@@ -43,6 +57,7 @@ class OkexAPI:
                 and "BEAR" not in ticker["instrument_id"]
                 and "BULL" not in ticker["instrument_id"]
                 and "DAI" not in ticker["instrument_id"]
+                and ticker["instrument_id"].count("BTC") == 1
             )
         ]
 
@@ -108,6 +123,7 @@ class BinanceAPI:
                 and "BEAR" not in ticker["symbol"]
                 and "BULL" not in ticker["symbol"]
                 and "DAI" not in ticker["symbol"]
+                and ticker["symbol"].count("BTC") == 1
             )
         ]
 
@@ -124,27 +140,66 @@ class CoinGecko:
         return data["data"]["market_cap_percentage"]["btc"]
 
 
+class ByBtAPI:
+
+    base_url: str = "https://fapi.bybt.com:443"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
+        'sec-fetch-site': 'same-site',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-dest': 'empty',
+        'referer': 'https://www.bybt.com/',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-ch-ua-mobile': '?0',
+        'authority': 'fapi.bybt.com',
+        'accept-language': 'en-US,en;q=0.9'
+    }
+
+    @staticmethod
+    def format_unix_time(unix_time: int):
+        return datetime.utcfromtimestamp(int(str(unix_time)[:-3]))
+
+    @staticmethod
+    def get_open_interest(fill_na: bool = True):
+        url: str = f"{ByBtAPI.base_url}/api/openInterest/v3/chart?symbol=BTC&timeType=0&exchangeName=&type=0"
+        r = os.popen(f'curl -X GET "{url}"').read()
+        data = json.loads(r)["data"]
+
+        aggregated_oi = {}
+        for exchange, oi_data in data["dataMap"].items():
+            oi_data = pd.Series(
+                oi_data,
+                index=[ByBtAPI.format_unix_time(d) for d in data["dateList"]],
+                name=f"{exchange} Open Interest"
+            )
+            if fill_na:
+                oi_data = oi_data.fillna(0)
+            aggregated_oi[exchange.lower().strip()] = oi_data
+        return aggregated_oi
+
+
+
 class TheBlockAPI:
 
     base_url: str = "https://data.tbstat.com"
     headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
-            'sec-fetch-site': 'cross-site',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-dest': 'empty',
-            'referer': 'https://www.theblockcrypto.com/',
-            'sec-ch-ua-platform': '"macOS"',
-            'sec-ch-ua-mobile': '?0',
-            'authority': 'data.tbstat.com',
-            'accept-language': 'en-US,en;q=0.9\''
-        }
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
+        'sec-fetch-site': 'cross-site',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-dest': 'empty',
+        'referer': 'https://www.theblockcrypto.com/',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-ch-ua-mobile': '?0',
+        'authority': 'data.tbstat.com',
+        'accept-language': 'en-US,en;q=0.9'
+    }
 
     @staticmethod
     def format_unix_time(unix_time: int) -> datetime:
         return datetime.utcfromtimestamp(unix_time)
 
     @staticmethod
-    def get_open_interset():
+    def get_open_interest():
         current_time: int = int(time.time())
         url: str = f"{TheBlockAPI.base_url}/dashboard/markets_futures_aggregatedopeninterestofbitcoinfutures_daily_bybt.json?v={current_time}"
         
