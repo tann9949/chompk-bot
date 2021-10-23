@@ -1,0 +1,26 @@
+name: Daily report everyday at 06:55 GMT+7
+
+on:
+  schedule:
+    - cron: "50 23 * * *"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run daily report file
+      run: |
+        TOKEN=${{ secrets.BOT_TOKEN }}
+        CHAT_ID=${{ secrets.CHAT_ID }}
+        python daily_report.py
