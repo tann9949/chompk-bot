@@ -21,6 +21,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        TOKEN=${{ secrets.BOT_TOKEN }}
-        CHAT_ID=${{ secrets.CHAT_ID }}
         python send_summary.py
+      env:
+        TOKEN: ${{ secrets.BOT_TOKEN }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
