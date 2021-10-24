@@ -3,6 +3,7 @@ name: Daily report everyday at 06:55 GMT+7
 on:
   schedule:
     - cron: "50 23 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
