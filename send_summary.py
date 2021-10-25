@@ -1,6 +1,7 @@
 import os
 import logging
 import sys
+import click
 
 from dotenv import load_dotenv
 
@@ -18,16 +19,17 @@ def init_dotenv():
     chat_id = os.getenv("CHAT_ID", "CHAT_ID")
     return {"token": token, "chat_id": chat_id}
 
-def main():
+@click.command()
+@click.option('--pair', default="usdt", help='pair usdt/btc')
+def main(pair: str):
     # load .env and unpack
     env = init_dotenv()
-    pair_arg = sys.argv[1]
     
-    (pair, exchange) = getPairAndExchange(pair_arg)
-    logging.info(f"sending summary for {pair} pairs from {exchange}")
+    (_pair, exchange) = getPairAndExchange(pair)
+    logging.info(f"sending summary for {_pair} pairs from {exchange}")
     
     bot = Bot(token=env["token"])
-    bot.send_message_to_chat(env["chat_id"], pair, exchange)
+    bot.send_message_to_chat(env["chat_id"], _pair, exchange)
 
 def getPairAndExchange(pair_arg: str):
     if pair_arg.lower == "btc":

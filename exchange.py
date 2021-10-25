@@ -1,4 +1,5 @@
-from enum import Enum
-class Exchange(Enum):
-    BINANCE = 1
-    OKEX = 2
+from strenum import StrEnum
+
+class Exchange(StrEnum):
+    BINANCE = "Binance",
+    OKEX = "Okex"
