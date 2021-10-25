@@ -16,7 +16,7 @@ class Bot:
     def __init__(self, token: str) -> None:
         self.token: str = token
 
-    def send_message_to_chat(self, chat_id: str, img_path: str = "tmp.png", pair: str = "usdt", exchange: Exchange = Exchange.BINANCE) -> None:
+    def send_message_to_chat(self, chat_id: str, pair: str = "usdt", exchange: Exchange = Exchange.BINANCE, img_path: str = "tmp.png") -> None:
         bot: telegram.Bot = telegram.Bot(token=self.token)
         logging.info("Calling Dashboard callbacks")
         
