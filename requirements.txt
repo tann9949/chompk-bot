@@ -5,3 +5,5 @@ pandas
 requests
 python-dotenv
 bs4
+strenum
+click
