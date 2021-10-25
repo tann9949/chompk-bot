@@ -1,4 +1,4 @@
-name: Daily report everyday at 06:55 GMT+7
+name: Daily report for BTC OKEX pairs everyday at 22:55 GMT+7
 
 on:
   schedule:
