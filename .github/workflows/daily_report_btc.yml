@@ -2,7 +2,7 @@ name: Daily report everyday at 06:55 GMT+7
 
 on:
   schedule:
-    - cron: "15 55 * * *"
+    - cron: "55 15 * * *"
   workflow_dispatch:
 
 jobs:
