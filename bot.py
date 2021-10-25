@@ -8,19 +8,20 @@ from telegram.ext import CommandHandler, Dispatcher, Updater
 from telegram.ext.filters import Filters
 from telegram.ext.messagehandler import MessageHandler
 
-from callback import CallBacks, get_bitcion_template, get_cdc_tickers
+from callback import CallBacks, get_bitcion_template, get_cdc_template
+from exchange import Exchange
 
 
 class Bot:
     def __init__(self, token: str) -> None:
         self.token: str = token
 
-    def send_message_to_chat(self, chat_id: str, img_path: str = "tmp.png") -> None:
+    def send_message_to_chat(self, chat_id: str, img_path: str = "tmp.png", pair: str = "usdt", exchange: Exchange = Exchange.BINANCE) -> None:
         bot: telegram.Bot = telegram.Bot(token=self.token)
         logging.info("Calling Dashboard callbacks")
         
         current_time: str = f"{datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-        cdc_template = get_cdc_tickers()
+        cdc_template = get_cdc_template(pair, exchange)
         btc_template = get_bitcion_template(img_path)
 
         bot.send_message(chat_id=chat_id, text=current_time)
@@ -49,7 +50,7 @@ class Bot:
         dispatcher.add_handler(
             CommandHandler(
                 "cdcaction",
-                partial(CallBacks.cdc_callback, current=False)
+                partial(CallBacks.cdc_callback, is_current=False)
             )
         )
         dispatcher.add_handler(

@@ -11,6 +11,7 @@ from telegram.ext import CallbackContext, Updater
 
 from api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, OkexAPI,
                  TheBlockAPI, ByBtAPI)
+from exchange import Exchange
 from solver import Solver
 from technical_analysis import TechnicalAnalysis as ta
 from utils import send_message, send_photo
@@ -106,7 +107,7 @@ class CallBacks:
         os.remove(img_path)
 
     @staticmethod
-    def cdc_callback(update: Updater, context: CallbackContext, current: bool = True) -> None:
+    def cdc_callback(update: Updater, context: CallbackContext, is_current: bool = True) -> None:
         args = context.args
         if len(args) == 0:
             pair = "usdt"
@@ -122,14 +123,14 @@ class CallBacks:
             context,
             message=f"Computing XXX{pair.upper()} pairs. This could take a few minutes 🙇‍♂️ ..."
         )
-        template = get_cdc_tickers(pair, current=current)
+        template = get_cdc_template(pair, current=is_current)
         send_message(
             update.effective_chat.id,
             context,
             message=template
         )
         if pair == "btc":
-            template = get_cdc_tickers(pair, "okex", current)
+            template = get_cdc_template(pair, Exchange.OKEX, is_current)
             send_message(
                 update.effective_chat.id,
                 context,
@@ -209,11 +210,11 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
     plt.savefig(save_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 
-def get_cdc_tickers(
+def get_cdc_template(
     pair: str = "usdt", 
-    exchange: str = "binance",
+    exchange: Exchange = Exchange.BINANCE,
     current: bool = True) -> str:
-    if exchange == "okex" and pair == "btc":
+    if exchange == Exchange.OKEX and pair == "btc":
         tickers = OkexAPI.get_btc_tickers()
     else:
         tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
@@ -225,7 +226,7 @@ def get_cdc_tickers(
     buymore_tickers = []
     sellmore_tickers = []
     for ticker in tickers:
-        if exchange == "okex":
+        if exchange == Exchange.OKEX:
             candle_data = OkexAPI.generate_candle_data(ticker)
         else:
             candle_data = BinanceAPI.generate_candle_data(ticker)
