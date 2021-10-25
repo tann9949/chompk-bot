@@ -7,3 +7,4 @@ python-dotenv
 bs4
 strenum
 click
+pytest

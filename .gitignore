@@ -3,4 +3,5 @@ venv
 **/.DS_Store
 **/__pycache__
 **/*.ipynb
-.png
+*.png
+**/.pytest_cache

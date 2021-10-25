@@ -9,12 +9,12 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, OkexAPI,
+from .api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, OkexAPI,
                  TheBlockAPI, ByBtAPI)
-from exchange import Exchange
-from solver import Solver
-from technical_analysis import TechnicalAnalysis as ta
-from utils import send_message, send_photo
+from .enums.exchange import Exchange
+from .solver import Solver
+from .technical_analysis import TechnicalAnalysis as ta
+from .utils import send_message, send_photo
 
 
 class CallBacks:
