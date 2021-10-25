@@ -8,8 +8,8 @@ from telegram.ext import CommandHandler, Dispatcher, Updater
 from telegram.ext.filters import Filters
 from telegram.ext.messagehandler import MessageHandler
 
-from callback import CallBacks, get_bitcion_template, get_cdc_template
-from exchange import Exchange
+from .callback import CallBacks, get_bitcion_template, get_cdc_template
+from .enums.exchange import Exchange
 
 
 class Bot:

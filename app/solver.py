@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from technical_analysis import TechnicalAnalysis as ta
+from .technical_analysis import TechnicalAnalysis as ta
 
 
 class Solver:

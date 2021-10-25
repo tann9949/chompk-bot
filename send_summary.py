@@ -1,12 +1,11 @@
 import os
 import logging
-import sys
 import click
 
 from dotenv import load_dotenv
 
-from bot import Bot
-from exchange import Exchange
+from app.bot import Bot
+from app.enums.exchange import Exchange
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -32,7 +31,7 @@ def main(pair: str):
     bot.send_message_to_chat(env["chat_id"], _pair, exchange)
 
 def getPairAndExchange(pair_arg: str):
-    if pair_arg.lower == "btc":
+    if pair_arg.lower() == "btc":
         return ("btc", Exchange.OKEX)
     else:
         return ("usdt", Exchange.BINANCE)

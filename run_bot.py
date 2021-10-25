@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from dotenv import load_dotenv
 
-from bot import Bot
+from app.bot import Bot
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
