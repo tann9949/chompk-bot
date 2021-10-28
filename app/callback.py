@@ -219,7 +219,7 @@ def get_cdc_template(
     else:
         tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
 
-
+    tickers = sorted(tickers)
 
     buy_tickers = []
     sell_tickers = []

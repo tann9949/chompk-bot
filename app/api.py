@@ -234,9 +234,9 @@ class AltcoinIndexAPI:
         for sc in soup.find_all("script"):
             if len(sc) != 1:
                 continue
-            if "var chartdata" in sc.contents[0]:
+            if "chartdata" in sc.contents[0] and '"labels"' in sc.contents[0]:
                 break
-        chart_data = json.loads(re.findall(r'chartdata = \{.+\}', sc.contents[0])[0].replace("chartdata = ", ""))
+        chart_data = json.loads(re.findall(r" = (\{.+\})", sc.contents[0])[0])
         timestamp = [
             datetime.strptime(t, "%Y-%m-%d")
             for t in chart_data["labels"]["year"]
