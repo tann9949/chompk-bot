@@ -19,22 +19,16 @@ def init_dotenv():
     return {"token": token, "chat_id": chat_id}
 
 @click.command()
-@click.option('--pair', default="usdt", help='pair usdt/btc')
-def main(pair: str):
+@click.option('--exchange', default="binance", help='pair binance/okex')
+def main(exchange: str):
     # load .env and unpack
     env = init_dotenv()
     
-    (_pair, exchange) = getPairAndExchange(pair)
-    logging.info(f"sending summary for {_pair} pairs from {exchange}")
+    logging.info(f"sending summary from {exchange}")
     
     bot = Bot(token=env["token"])
-    bot.send_message_to_chat(env["chat_id"], _pair, exchange)
-
-def getPairAndExchange(pair_arg: str):
-    if pair_arg.lower() == "btc":
-        return ("btc", Exchange.OKEX)
-    else:
-        return ("usdt", Exchange.BINANCE)
+    bot.send_message_to_chat(env["chat_id"], exchange)
+    
 
 if __name__ == "__main__":
     main()
