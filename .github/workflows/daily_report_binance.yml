@@ -1,8 +1,8 @@
-name: Daily report for BTC OKEX pairs everyday at 22:55 GMT+7
+name: Daily report everyday at 06:55 GMT+7
 
 on:
   schedule:
-    - cron: "55 15 * * *"
+    - cron: "50 23 * * *"
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --pair btc
+        python send_summary.py --exchange binance
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
         CHAT_ID: ${{ secrets.CHAT_ID }}
