@@ -29,7 +29,7 @@ def main(exchange: str):
     logging.info(f"sending summary from {exchange}")
     
     bot = Bot(token=env["token"])
-    bot.send_message_to_chat(env["chat_id"][exchange])
+    bot.send_message_to_chat(env["chat_id"][exchange], exchange)
     
 
 if __name__ == "__main__":
