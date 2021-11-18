@@ -126,7 +126,6 @@ class BinanceAPI:
                 and ticker["symbol"].count("BTC") == 1
             )
         ]
-
 class FtxAPI:
     base_url: str = "https://ftx.com"
     gran_mapping: Dict[str, int] = {
@@ -142,22 +141,22 @@ class FtxAPI:
 
     @staticmethod
     def generate_candle_data(
-        name: str, 
-        interval: str = "1d") -> pd.DataFrame:
-        r = requests.get(f"{FtxAPI.base_url}/api/markets/BTC/USD/candles?resolution=86400")
+        instrument_id: str,
+        granularity: str = "1d") -> pd.DataFrame:
+        timeframe = OkexAPI.gran_mapping[granularity]
+        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles?granularity={timeframe}")
         klines = json.loads(r.text)
         candle_data = []
         timestamp = []
-        for l in klines["result"]:
-            open_time = l["startTime"]
+        for l in klines:
+            open_time = datetime.strptime(l[0], "%Y-%m-%dT%H:%M:%S.000Z")
             timestamp.append(open_time)
-            # end_time = datetime.utcfromtimestamp(l[6])
-            volume = l["volume"]
-            high, low, op, close = l["high"], l["low"], l["open"], l["close"]
+            volume = l[5]
+            high, low, op, close = l[2], l[3], l[1], l[4]
             candle_data.append([op, close, high, low, volume])
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
-        return candle_data.astype(float)
-    
+        return candle_data.astype(float).resample("1D").mean()
+
     def get_usd_tickers() -> List[str]:
         r = requests.get(f"{FtxAPI.base_url}/api/markets")
         tickers = json.loads(r.text)
@@ -166,7 +165,7 @@ class FtxAPI:
             for ticker in tickers["result"]
             if (
                 ticker["name"][:3] != "USD"
-                and "USD" in ticker["name"] 
+                and "USD" in ticker["name"]
                 and "USDT" not in ticker["name"]
                 and "UP" not in ticker["name"]
                 and "DOWN" not in ticker["name"]
@@ -176,7 +175,27 @@ class FtxAPI:
                 and "DAI" not in ticker["name"]
             )
         ]
-
+    def get_btc_tickers() -> List[str]:
+        r = requests.get(f"{FtxAPI.base_url}/api/markets")
+        tickers = json.loads(r.text)
+        
+        return [
+            ticker["name"]
+            
+            for ticker in tickers["result"]
+            if (
+                ticker["name"][:3] != "BTC"
+                and "USD" not in ticker["name"]
+                and "BTC" in ticker["name"]
+                and "UP" not in ticker["name"]
+                and "DOWN" not in ticker["name"]
+                and "BEAR" not in ticker["name"]
+                and "BULL" not in ticker["name"]
+                and ticker["name"].count("BTC") == 1
+                and "DAI" not in ticker["name"]
+                and "-" not in ticker["name"]
+            )
+        ]
 
 class CoinGecko:
 
