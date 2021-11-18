@@ -35,6 +35,7 @@ class Bot:
         # os.remove(img_path)
         
         donate_template: str = "Buy developers some coffee ☕ or tea 🍵 :" + \
+            "(BEP-20 / ERC-20)" + \
             "    0xc7b16d2e1cDB9FD6B59A55e110D75d8aADA446E0\n" + \
             "\nAny donation is appreciated 🤗" + \
             "\nHave a great day!" + \
