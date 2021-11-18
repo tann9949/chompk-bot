@@ -22,9 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --exchange binance --pair usdt
-        python send_summary.py --exchange binance --pair btc
+        python send_summary.py --exchange binance
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        USDT_CHAT_ID: ${{ secrets.USDT_CHAT_ID }}
-        BTC_CHAT_ID: ${{ secrets.BTC_CHAT_ID }}
+        BINANCE_CHAT_ID: ${{ secrets.BINANCE_CHAT_ID }}
