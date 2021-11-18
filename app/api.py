@@ -127,6 +127,56 @@ class BinanceAPI:
             )
         ]
 
+class FtxAPI:
+    base_url: str = "https://ftx.com"
+    gran_mapping: Dict[str, int] = {
+        "15min": 900,
+        "30min": 1800,
+        "1h": 3600,
+        "4h": 14400,
+        "12h": 43200,
+        "1d": 86400,
+        "1W": 604800,
+        "1M": 2678400
+    }
+
+    @staticmethod
+    def generate_candle_data(
+        name: str, 
+        interval: str = "1d") -> pd.DataFrame:
+        r = requests.get(f"{FtxAPI.base_url}/api/markets/BTC/USD/candles?resolution=86400")
+        klines = json.loads(r.text)
+        candle_data = []
+        timestamp = []
+        for l in klines["result"]:
+            open_time = l["startTime"]
+            timestamp.append(open_time)
+            # end_time = datetime.utcfromtimestamp(l[6])
+            volume = l["volume"]
+            high, low, op, close = l["high"], l["low"], l["open"], l["close"]
+            candle_data.append([op, close, high, low, volume])
+        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
+        return candle_data.astype(float)
+    
+    def get_usd_tickers() -> List[str]:
+        r = requests.get(f"{FtxAPI.base_url}/api/markets")
+        tickers = json.loads(r.text)
+        return [
+            ticker["name"]
+            for ticker in tickers["result"]
+            if (
+                ticker["name"][:3] != "USD"
+                and "USD" in ticker["name"] 
+                and "USDT" not in ticker["name"]
+                and "UP" not in ticker["name"]
+                and "DOWN" not in ticker["name"]
+                and "BEAR" not in ticker["name"]
+                and "BULL" not in ticker["name"]
+                and ticker["name"].count("USD") == 1
+                and "DAI" not in ticker["name"]
+            )
+        ]
+
 
 class CoinGecko:
 
