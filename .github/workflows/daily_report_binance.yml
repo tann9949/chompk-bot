@@ -25,4 +25,4 @@ jobs:
         python send_summary.py --exchange binance
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        CHAT_ID: ${{ secrets.CHAT_ID }}
+        BINANCE_CHAT_ID: ${{ secrets.BINANCE_CHAT_ID }}
