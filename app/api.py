@@ -43,6 +43,23 @@ class OkexAPI:
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
         return candle_data.astype(float).resample("1D").mean()
 
+    def get_usd_tickers() -> List[str]:
+        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
+        tickers = json.loads(r.text)
+        return [
+            ticker["instrument_id"]
+            for ticker in tickers
+            if (
+                ticker["instrument_id"][:3] != "USDT"
+                and "USDT" in ticker["instrument_id"]
+                and "DOWN" not in ticker["instrument_id"]
+                and "BEAR" not in ticker["instrument_id"]
+                and "BULL" not in ticker["instrument_id"]
+                and "DAI" not in ticker["instrument_id"]
+                and ticker["instrument_id"].count("USDT") == 1
+            )
+        ]
+    
     def get_btc_tickers() -> List[str]:
         r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
         tickers = json.loads(r.text)
