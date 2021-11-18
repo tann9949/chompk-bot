@@ -10,28 +10,27 @@ from telegram.ext.messagehandler import MessageHandler
 
 from .callback import CallBacks, get_bitcion_template, get_cdc_template
 from .enums.exchange import Exchange
+from .enums.pairs import Pairs
 
 
 class Bot:
     def __init__(self, token: str) -> None:
         self.token: str = token
 
-    def send_message_to_chat(self, chat_id: str, exchange: Exchange = Exchange.BINANCE, img_path: str = "tmp.png") -> None:
+    def send_message_to_chat(self, chat_id: str, exchange: Exchange = Exchange.BINANCE, pair: Pairs = Pairs.USDT, img_path: str = "tmp.png") -> None:
         bot: telegram.Bot = telegram.Bot(token=self.token)
         logging.info("Calling Dashboard callbacks")
         
-        current_time: str = f"{datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-        cdc_usdt_template = get_cdc_template("usdt", exchange)
-        cdc_btc_template = get_cdc_template("btc", exchange)
-        btc_template = get_bitcion_template(img_path)
+        current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
+        cdc_template = get_cdc_template(pair.lower().strip(), exchange)
+        # btc_template = get_bitcion_template(img_path)
 
         bot.send_message(chat_id=chat_id, text=current_time)
-        bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
-        bot.send_message(chat_id=chat_id, text=cdc_btc_template)
+        bot.send_message(chat_id=chat_id, text=cdc_template)
         
-        bot.send_message(chat_id=chat_id, text=btc_template)
-        bot.send_photo(chat_id=chat_id, photo=open(img_path, "rb"))
-        os.remove(img_path)
+        # bot.send_message(chat_id=chat_id, text=btc_template)
+        # bot.send_photo(chat_id=chat_id, photo=open(img_path, "rb"))
+        # os.remove(img_path)
         
         donate_template: str = "Buy developers some coffee ☕ or tea 🍵 :" + \
             "    0xc7b16d2e1cDB9FD6B59A55e110D75d8aADA446E0\n" + \

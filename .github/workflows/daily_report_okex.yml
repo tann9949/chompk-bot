@@ -22,7 +22,9 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --exchange okex
+        python send_summary.py --exchange okex --pair usdt
+        python send_summary.py --exchange okex --pair btc
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        CHAT_ID: ${{ secrets.CHAT_ID }}
+        USDT_CHAT_ID: ${{ secrets.USDT_CHAT_ID }}
+        BTC_CHAT_ID: ${{ secrets.BTC_CHAT_ID }}
