@@ -1,4 +1,4 @@
-name: Daily report everyday at 06:55 GMT+7
+name: FTX Daily report everyday at 06:55 GMT+7
 
 on:
   schedule:
@@ -25,4 +25,4 @@ jobs:
         python send_summary.py --exchange ftx
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        BINANCE_CHAT_ID: ${{ secrets.FTX_CHAT_ID }}
+        FTX_CHAT_ID: ${{ secrets.FTX_CHAT_ID }}
