@@ -43,7 +43,7 @@ class OkexAPI:
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
         return candle_data.astype(float).resample("1D").mean()
 
-    def get_usd_tickers() -> List[str]:
+    def get_usdt_tickers() -> List[str]:
         r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
         tickers = json.loads(r.text)
         return [
@@ -144,8 +144,8 @@ class BinanceAPI:
             )
         ]
 class FtxAPI:
-    base_url: str = "https://ftx.com"
-    gran_mapping: Dict[str, int] = {
+    base_url: str = "https://ftx.com/api"
+    reso_mapping: Dict[str, int] = {
         "15min": 900,
         "30min": 1800,
         "1h": 3600,
@@ -158,24 +158,25 @@ class FtxAPI:
 
     @staticmethod
     def generate_candle_data(
-        instrument_id: str,
-        granularity: str = "1d") -> pd.DataFrame:
-        timeframe = OkexAPI.gran_mapping[granularity]
-        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles?granularity={timeframe}")
-        klines = json.loads(r.text)
+        market_name: str,
+        resolution: str = "1d") -> pd.DataFrame:
+        timeframe = FtxAPI.reso_mapping[resolution]
+        url: str = f"{FtxAPI.base_url}/markets/{market_name}/candles?resolution={timeframe}"  # &start_time={start_time}&end_time={end_time}"
+        r = requests.get(url)
+        klines = json.loads(r.text)["result"]
         candle_data = []
         timestamp = []
         for l in klines:
-            open_time = datetime.strptime(l[0], "%Y-%m-%dT%H:%M:%S.000Z")
+            open_time = datetime.strptime(l["startTime"], "%Y-%m-%dT%H:%M:%S+00:00")
             timestamp.append(open_time)
-            volume = l[5]
-            high, low, op, close = l[2], l[3], l[1], l[4]
+            volume = l["volume"]
+            high, low, op, close = l["high"], l["low"], l["open"], l["close"]
             candle_data.append([op, close, high, low, volume])
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
         return candle_data.astype(float).resample("1D").mean()
 
-    def get_usd_tickers() -> List[str]:
-        r = requests.get(f"{FtxAPI.base_url}/api/markets")
+    def get_usdt_tickers() -> List[str]:
+        r = requests.get(f"{FtxAPI.base_url}/markets")
         tickers = json.loads(r.text)
         return [
             ticker["name"]
@@ -186,6 +187,8 @@ class FtxAPI:
                 and "USDT" not in ticker["name"]
                 and "UP" not in ticker["name"]
                 and "DOWN" not in ticker["name"]
+                and "HALF/" not in ticker["name"]
+                and "HEDGE/" not in ticker["name"]
                 and "BEAR" not in ticker["name"]
                 and "BULL" not in ticker["name"]
                 and ticker["name"].count("USD") == 1
@@ -193,7 +196,7 @@ class FtxAPI:
             )
         ]
     def get_btc_tickers() -> List[str]:
-        r = requests.get(f"{FtxAPI.base_url}/api/markets")
+        r = requests.get(f"{FtxAPI.base_url}/markets")
         tickers = json.loads(r.text)
         
         return [

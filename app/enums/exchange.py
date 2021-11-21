@@ -1,5 +1,6 @@
 from strenum import StrEnum
 
 class Exchange(StrEnum):
-    BINANCE = "Binance",
-    OKEX = "Okex"
+    BINANCE = "binance",
+    OKEX = "okex",
+    FTX = "ftx"
