@@ -9,7 +9,7 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from .api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, OkexAPI,
+from .api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, FtxAPI, OkexAPI,
                  TheBlockAPI, ByBtAPI)
 from .enums.exchange import Exchange
 from .solver import Solver
@@ -214,10 +214,13 @@ def get_cdc_template(
     pair: str = "usdt", 
     exchange: Exchange = Exchange.BINANCE,
     current: bool = True) -> str:
-    if exchange == Exchange.OKEX and pair == "btc":
-        tickers = OkexAPI.get_btc_tickers()
-    else:
+    if exchange == Exchange.OKEX:
+        tickers = OkexAPI.get_usdt_tickers() if pair == "usdt" else OkexAPI.get_btc_tickers()
+    elif exchange == Exchange.BINANCE:
         tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
+    elif exchange == Exchange.FTX:
+        tickers = FtxAPI.get_usdt_tickers() if pair == "usdt" else FtxAPI.get_btc_tickers()
+        
 
     tickers = sorted(tickers)
 
@@ -228,8 +231,12 @@ def get_cdc_template(
     for ticker in tickers:
         if exchange == Exchange.OKEX:
             candle_data = OkexAPI.generate_candle_data(ticker)
-        else:
+        elif exchange == Exchange.FTX:
+            candle_data = FtxAPI.generate_candle_data(ticker)
+        elif exchange == Exchange.BINANCE:
             candle_data = BinanceAPI.generate_candle_data(ticker)
+        else:
+            raise KeyError(f"Unknown exchange: {exchange}")
 
         signal = Solver.get_cdc_signal(candle_data["close"], current=current)
         logging.info(f"Ticker ({ticker}) is {signal}")
@@ -245,13 +252,13 @@ def get_cdc_template(
 
     cdc_template: str = f"[{exchange.upper()}]\n" + \
         f"CDC Action Zone V3 \n\n" + \
-        "Buy Next Bar 🟢\n" + \
+        "(Buy Now Next Bar) - buy now! 🟢\n" + \
         f"{' '.join(buy_tickers)}\n\n" + \
-        "Sell Next Bar 🔴\n" + \
+        "(Sell Now Next Bar) - sell now! 🔴\n" + \
         f"{' '.join(sell_tickers)}\n\n" + \
-        "Buy More Next Bar 🔼\n" + \
+        "(Buy More Next Bar) - buy the dip / take long position now! 🔼\n" + \
         f"{' '.join(buymore_tickers)}\n\n" + \
-        "Sell More Next Bar 🔽\n" + \
+        "(Sell More Next Bar) -  short now! 🔽\n" + \
         f"{' '.join(sellmore_tickers)}\n\n"
 
     return cdc_template
