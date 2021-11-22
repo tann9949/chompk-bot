@@ -1,6 +1,7 @@
 import logging
-from datetime import datetime
 import os
+import re
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
@@ -9,8 +10,8 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from .api import (AltcoinIndexAPI, BinanceAPI, CoinGecko, FearAndGreedAPI, FtxAPI, OkexAPI,
-                 TheBlockAPI, ByBtAPI)
+from .api import (AltcoinIndexAPI, BinanceAPI, ByBtAPI, CoinGecko,
+                  FearAndGreedAPI, FtxAPI, OkexAPI)
 from .enums.exchange import Exchange
 from .solver import Solver
 from .technical_analysis import TechnicalAnalysis as ta
@@ -242,19 +243,19 @@ def get_cdc_template(
         logging.info(f"Ticker ({ticker}) is {signal}")
 
         if signal == "buy":
-            buy_tickers.append(ticker)
+            buy_tickers.append(re.sub(r"-|/", "", ticker))
         elif signal == "sell":
-            sell_tickers.append(ticker)
+            sell_tickers.append(re.sub(r"-|/", "", ticker))
         elif signal == "buy more":
-            buymore_tickers.append(ticker)
+            buymore_tickers.append(re.sub(r"-|/", "", ticker))
         elif signal == "sell more":
-            sellmore_tickers.append(ticker)
+            sellmore_tickers.append(re.sub(r"-|/", "", ticker))
 
     cdc_template: str = f"[{exchange.upper()}]\n" + \
         f"CDC Action Zone V3 \n\n" + \
-        "(Buy Now Next Bar) - buy now! 🟢\n" + \
+        "(Buy Next Bar) - buy now! 🟢\n" + \
         f"{' '.join(buy_tickers)}\n\n" + \
-        "(Sell Now Next Bar) - sell now! 🔴\n" + \
+        "(Sell Next Bar) - sell now! 🔴\n" + \
         f"{' '.join(sell_tickers)}\n\n" + \
         "(Buy More Next Bar) - buy the dip / take long position now! 🔼\n" + \
         f"{' '.join(buymore_tickers)}\n\n" + \
