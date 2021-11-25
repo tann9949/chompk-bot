@@ -279,19 +279,6 @@ class KucoinAPI:
             )
         ]
 
-import json
-import re
-import os
-import time
-from datetime import datetime
-from typing import Any, Dict, List
-
-import pandas as pd
-import requests
-from bs4 import BeautifulSoup
-from requests.models import Response
-
-
 class BitkubAPI:
 
     base_url: str = "https://api.bitkub.com"
