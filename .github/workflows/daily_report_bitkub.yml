@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --exchange okex
+        python send_summary.py --exchange bitkub
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
         BITKUB_CHAT_ID: ${{ secrets.BITKUB_CHAT_ID }}
