@@ -143,7 +143,7 @@ class BinanceAPI:
                 and ticker["symbol"].count("BTC") == 1
             )
         ]
-        
+
 class FtxAPI:
     base_url: str = "https://ftx.com/api"
     reso_mapping: Dict[str, int] = {
@@ -276,6 +276,48 @@ class KucoinAPI:
                 and "BULL" not in ticker["symbol"]
                 and "DAI" not in ticker["symbol"]
                 and ticker["symbol"].count("BTC") == 1
+            )
+        ]
+
+class BitkubAPI:
+
+    base_url: str = "https://api.bitkub.com"
+   
+    @staticmethod
+    def generate_candle_data(
+        symbol: str, 
+        start: int,
+        end: int,
+        interval: str = "1D") -> pd.DataFrame:
+        r = requests.get(f"{BitkubAPI.base_url}/tradingview/history", {"symbol": symbol, "resolution": interval,"from": start, "to":end})
+        klines = json.loads(r.text)
+        candle_data = []
+        timestamp = []
+        for T in range(len(klines["t"])):
+            open_time = (datetime.utcfromtimestamp(int(klines["t"][T])).strftime('%Y-%m-%d %H:%M:%S'))
+            timestamp.append(open_time)
+            # end_time = datetime.utcfromtimestamp(l[6])
+            volume = klines["v"][T]
+            high, low, op, close = klines["h"][T],klines["l"][T],klines["o"][T],klines["c"][T]
+            candle_data.append([op, close, high, low, volume])
+        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
+        return candle_data.astype(float)
+    @staticmethod
+    def get_thb_tickers() -> List[str]:
+        r = requests.get(f"{BitkubAPI.base_url}/api/market/symbols")
+        tickers = json.loads(r.text)
+        return [
+            str(ticker["symbol"][4:]+"_"+ticker["symbol"][:3])
+            for ticker in tickers["result"]
+            if (
+                ticker["symbol"][:4] != "USDT"
+                and "THB" in ticker["symbol"]
+                and "USD" not in ticker["symbol"] 
+                and "DOWN" not in ticker["symbol"]
+                and "BEAR" not in ticker["symbol"]
+                and "BULL" not in ticker["symbol"]
+                and "DAI" not in ticker["symbol"]
+                and ticker["symbol"].count("THB") == 1
             )
         ]
 
