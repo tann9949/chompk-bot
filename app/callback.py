@@ -10,9 +10,10 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from .api import (AltcoinIndexAPI, BinanceAPI, ByBtAPI, CoinGecko,
-                  FearAndGreedAPI, FtxAPI, OkexAPI)
+from .api import (AltcoinIndexAPI, BinanceAPI, BitkubAPI, ByBtAPI, CoinGecko,
+                  FearAndGreedAPI, FtxAPI, KucoinAPI, OkexAPI)
 from .enums.exchange import Exchange
+from .enums.pairs import Pairs
 from .solver import Solver
 from .technical_analysis import TechnicalAnalysis as ta
 from .utils import send_message, send_photo
@@ -221,6 +222,11 @@ def get_cdc_template(
         tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
     elif exchange == Exchange.FTX:
         tickers = FtxAPI.get_usdt_tickers() if pair == "usdt" else FtxAPI.get_btc_tickers()
+    elif exchange == Exchange.KUCOIN:
+        tickers = KucoinAPI.get_usdt_tickers() if pair == "usdt" else KucoinAPI.get_btc_tickers()
+    elif exchange == Exchange.BITKUB:
+        assert pair == Pairs.THB
+        tickers = BitkubAPI.get_thb_tickers()
         
 
     tickers = sorted(tickers)
@@ -236,8 +242,15 @@ def get_cdc_template(
             candle_data = FtxAPI.generate_candle_data(ticker)
         elif exchange == Exchange.BINANCE:
             candle_data = BinanceAPI.generate_candle_data(ticker)
+        elif exchange == Exchange.KUCOIN:
+            candle_data = KucoinAPI.generate_candle_data(ticker)
+        elif exchange == Exchange.BITKUB:
+            candle_data = BitkubAPI.generate_candle_data(ticker)
         else:
             raise KeyError(f"Unknown exchange: {exchange}")
+        
+        if candle_data is None:
+            continue
 
         signal = Solver.get_cdc_signal(candle_data["close"], current=current)
         logging.info(f"Ticker ({ticker}) is {signal}")

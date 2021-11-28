@@ -2,7 +2,7 @@ name: OKEX Daily report everyday at 22:55 GMT+7
 
 on:
   schedule:
-    - cron: "50 15 * * *"
+    - cron: "45 15 * * *"
   workflow_dispatch:
 
 jobs:
