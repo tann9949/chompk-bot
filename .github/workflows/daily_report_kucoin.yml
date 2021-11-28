@@ -1,4 +1,4 @@
-name: FTX Daily report everyday at 06:55 GMT+7
+name: KUCOIN Daily report everyday at 06:55 GMT+7
 
 on:
   schedule:
@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --exchange ftx
+        python send_summary.py --exchange kucoin
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        FTX_CHAT_ID: ${{ secrets.FTX_CHAT_ID }}
+        KUCOIN_CHAT_ID: ${{ secrets.KUCOIN_CHAT_ID }}

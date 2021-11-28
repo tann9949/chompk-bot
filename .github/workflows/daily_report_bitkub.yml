@@ -1,8 +1,8 @@
-name: FTX Daily report everyday at 06:55 GMT+7
+name: BITKUB Daily report everyday at 23:45 GMT+7
 
 on:
   schedule:
-    - cron: "45 23 * * *"
+    - cron: "45 16 * * *"
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run daily report file
       run: |
-        python send_summary.py --exchange ftx
+        python send_summary.py --exchange okex
       env:
         TOKEN: ${{ secrets.BOT_TOKEN }}
-        FTX_CHAT_ID: ${{ secrets.FTX_CHAT_ID }}
+        BITKUB_CHAT_ID: ${{ secrets.BITKUB_CHAT_ID }}

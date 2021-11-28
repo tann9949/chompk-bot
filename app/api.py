@@ -1,6 +1,7 @@
 import json
-import re
+import logging
 import os
+import re
 import time
 from datetime import datetime
 from typing import Any, Dict, List
@@ -226,9 +227,21 @@ class KucoinAPI:
     @staticmethod
     def generate_candle_data(
         symbol: str, 
-        interval: str = "1day") -> pd.DataFrame:
+        interval: str = "1day",
+        max_attempt: int = 10) -> pd.DataFrame:
         r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})
         klines = json.loads(r.text)
+        
+        n_attempt = 0
+        while klines["code"] != "200000":
+            if n_attempt > max_attempt:
+                return None
+            logging.warning(f"Error fetching API. Retrying in 0.1 seconds")
+            time.sleep(0.1)
+            r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})
+            klines = json.loads(r.text)
+            n_attempt += 1
+        
         candle_data = []
         timestamp = []
         for l in klines["data"]:
@@ -239,7 +252,7 @@ class KucoinAPI:
             high, low, op, close = l[3], l[4], l[1], l[2]
             candle_data.append([op, close, high, low, volume])
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
-        return candle_data.astype(float)
+        return candle_data.astype(float)[::-1]
     
     @staticmethod
     def get_usdt_tickers() -> List[str]:
@@ -255,6 +268,8 @@ class KucoinAPI:
                 and "DOWN" not in ticker["symbol"]
                 and "BEAR" not in ticker["symbol"]
                 and "BULL" not in ticker["symbol"]
+                and "3L" not in ticker["symbol"]
+                and "3S" not in ticker["symbol"]
                 and ticker["symbol"].count("USD") == 1
                 and "DAI" not in ticker["symbol"]
             )
@@ -282,17 +297,40 @@ class KucoinAPI:
 class BitkubAPI:
 
     base_url: str = "https://api.bitkub.com"
+    reso_mapping: Dict[str, int] = {
+        "15min": 900,
+        "30min": 1800,
+        "1h": 3600,
+        "4h": 14400,
+        "12h": 43200,
+        "1D": 86400,
+        "1W": 604800,
+        "1M": 2678400
+    }
    
     @staticmethod
     def generate_candle_data(
         symbol: str, 
-        start: int,
-        end: int,
+        lookback: int = 100,  # numbers of candles to lookback
         interval: str = "1D") -> pd.DataFrame:
-        r = requests.get(f"{BitkubAPI.base_url}/tradingview/history", {"symbol": symbol, "resolution": interval,"from": start, "to":end})
+        # format start, end time
+        end = int(time.time())
+        start = end - BitkubAPI.reso_mapping[interval] * lookback
+        
+        r = requests.get(
+            f"{BitkubAPI.base_url}/tradingview/history", 
+            {
+                "symbol": symbol, 
+                "resolution": interval,
+                "from": start, 
+                "to": end
+            }
+        )
         klines = json.loads(r.text)
         candle_data = []
         timestamp = []
+        if klines["s"] == "no_data":
+            return None
         for T in range(len(klines["t"])):
             open_time = (datetime.utcfromtimestamp(int(klines["t"][T])).strftime('%Y-%m-%d %H:%M:%S'))
             timestamp.append(open_time)
@@ -302,6 +340,7 @@ class BitkubAPI:
             candle_data.append([op, close, high, low, volume])
         candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
         return candle_data.astype(float)
+    
     @staticmethod
     def get_thb_tickers() -> List[str]:
         r = requests.get(f"{BitkubAPI.base_url}/api/market/symbols")

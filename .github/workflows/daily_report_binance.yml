@@ -2,7 +2,7 @@ name: BINANCE Daily report everyday at 06:55 GMT+7
 
 on:
   schedule:
-    - cron: "50 23 * * *"
+    - cron: "45 23 * * *"
   workflow_dispatch:
 
 jobs:
