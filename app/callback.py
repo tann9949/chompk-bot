@@ -256,13 +256,13 @@ def get_cdc_template(
         logging.info(f"Ticker ({ticker}) is {signal}")
 
         if signal == "buy":
-            buy_tickers.append(re.sub(r"-|/", "", ticker))
+            buy_tickers.append(re.sub(r"-|/|_", "", ticker))
         elif signal == "sell":
-            sell_tickers.append(re.sub(r"-|/", "", ticker))
+            sell_tickers.append(re.sub(r"-|/|_", "", ticker))
         elif signal == "buy more":
-            buymore_tickers.append(re.sub(r"-|/", "", ticker))
+            buymore_tickers.append(re.sub(r"-|/|_", "", ticker))
         elif signal == "sell more":
-            sellmore_tickers.append(re.sub(r"-|/", "", ticker))
+            sellmore_tickers.append(re.sub(r"-|/|_", "", ticker))
 
     cdc_template: str = f"[{exchange.upper()}]\n" + \
         f"CDC Action Zone V3 \n\n" + \
