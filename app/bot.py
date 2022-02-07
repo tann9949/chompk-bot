@@ -21,7 +21,25 @@ class Bot:
         bot: telegram.Bot = telegram.Bot(token=self.token)
         logging.info("Calling Dashboard callbacks")
         
-        if exchange != Exchange.BITKUB:
+        if exchange == Exchange.BITKUB:
+            cdc_thb_template = get_cdc_template(Pairs.THB, exchange)
+            # btc_template = get_bitcion_template(img_path)
+
+            current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
+            bot.send_message(chat_id=chat_id, text=current_time)
+            bot.send_message(chat_id=chat_id, text=cdc_thb_template)
+        elif exchange == Exchange.FTX:
+            cdc_usdt_template = get_cdc_template(Pairs.USDT, exchange)
+            cdc_perp_template = get_cdc_template(Pairs.PERP, exchange)
+            cdc_btc_template = get_cdc_template(Pairs.BTC, exchange)
+            # btc_template = get_bitcion_template(img_path)
+
+            current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
+            bot.send_message(chat_id=chat_id, text=current_time)
+            bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
+            bot.send_message(chat_id=chat_id, text=cdc_perp_template)
+            bot.send_message(chat_id=chat_id, text=cdc_btc_template)
+        else:
             cdc_usdt_template = get_cdc_template(Pairs.USDT, exchange)
             cdc_btc_template = get_cdc_template(Pairs.BTC, exchange)
             # btc_template = get_bitcion_template(img_path)
@@ -30,13 +48,7 @@ class Bot:
             bot.send_message(chat_id=chat_id, text=current_time)
             bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
             bot.send_message(chat_id=chat_id, text=cdc_btc_template)
-        else:
-            cdc_thb_template = get_cdc_template(Pairs.THB, exchange)
-            # btc_template = get_bitcion_template(img_path)
-
-            current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-            bot.send_message(chat_id=chat_id, text=current_time)
-            bot.send_message(chat_id=chat_id, text=cdc_thb_template)
+            
         
         # bot.send_message(chat_id=chat_id, text=btc_template)
         # bot.send_photo(chat_id=chat_id, photo=open(img_path, "rb"))

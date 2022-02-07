@@ -1,3 +1,4 @@
+from ftplib import FTP
 import logging
 import os
 import re
@@ -10,7 +11,7 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from .api import (AltcoinIndexAPI, BinanceAPI, BitkubAPI, ByBtAPI, CoinGecko,
+from .api import (AltcoinIndexAPI, BinanceAPI, BitkubAPI, CoinglassAPI, CoinGecko,
                   FearAndGreedAPI, FtxAPI, KucoinAPI, OkexAPI)
 from .enums.exchange import Exchange
 from .enums.pairs import Pairs
@@ -66,7 +67,7 @@ class CallBacks:
             return
 
         exchange: str = args[0].lower().strip()
-        oi_data: Dict[str, pd.Series] = ByBtAPI.get_open_interest()
+        oi_data: Dict[str, pd.Series] = CoinglassAPI.get_open_interest()
         if exchange not in oi_data.keys():
             send_message(update.effective_chat.id, context, f"Unrecognize exchange: {exchange}")
             return
@@ -217,13 +218,18 @@ def get_cdc_template(
     exchange: Exchange = Exchange.BINANCE,
     current: bool = True) -> str:
     if exchange == Exchange.OKEX:
-        tickers = OkexAPI.get_usdt_tickers() if pair == "usdt" else OkexAPI.get_btc_tickers()
+        tickers = OkexAPI.get_usdt_tickers() if pair == Pairs.USDT else OkexAPI.get_btc_tickers()
     elif exchange == Exchange.BINANCE:
-        tickers = BinanceAPI.get_usdt_tickers() if pair == "usdt" else BinanceAPI.get_btc_tickers()
+        tickers = BinanceAPI.get_usdt_tickers() if pair == Pairs.USDT else BinanceAPI.get_btc_tickers()
     elif exchange == Exchange.FTX:
-        tickers = FtxAPI.get_usdt_tickers() if pair == "usdt" else FtxAPI.get_btc_tickers()
+        if pair == Pairs.USDT:
+            tickers = FtxAPI.get_usdt_tickers()
+        elif pair == Pairs.PERP:
+            tickers = FtxAPI.get_perp_tickers()
+        else:
+            tickers = FtxAPI.get_btc_tickers()
     elif exchange == Exchange.KUCOIN:
-        tickers = KucoinAPI.get_usdt_tickers() if pair == "usdt" else KucoinAPI.get_btc_tickers()
+        tickers = KucoinAPI.get_usdt_tickers() if pair == Pairs.USDT else KucoinAPI.get_btc_tickers()
     elif exchange == Exchange.BITKUB:
         assert pair == Pairs.THB
         tickers = BitkubAPI.get_thb_tickers()
@@ -283,7 +289,7 @@ def get_bitcion_template(img_path: str) -> str:
     logging.info("Fetching BTC Price...")
     btcusdt: pd.DataFrame = BinanceAPI.generate_candle_data("BTCUSDT")
     logging.info("Fetching Altcoin Index...")
-    oi: Dict[str, pd.Series] = ByBtAPI.get_open_interest()
+    oi: Dict[str, pd.Series] = CoinglassAPI.get_open_interest()
     logging.info("Fetching Fear and Greed Index...")
     altcoin_idx: pd.Series = AltcoinIndexAPI.get_historical_altcoin_index()
     logging.info("Fetching Bitcoin Aggregated Open Interest...")

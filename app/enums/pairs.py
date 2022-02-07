@@ -4,3 +4,4 @@ class Pairs(StrEnum):
     BTC = "btc",
     USDT = "usdt",
     THB = "thb",
+    PERP = "perp"
