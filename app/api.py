@@ -197,6 +197,16 @@ class FtxAPI:
                 and "DAI" not in ticker["name"]
             )
         ]
+        
+    def get_perp_tickers() -> List[str]:
+        r = requests.get(f"{FtxAPI.base_url}/markets")
+        tickers = json.loads(r.text)
+        return [
+            ticker["name"]
+            for ticker in tickers["result"]
+            if "PERP" in ticker["name"]
+        ]
+        
     def get_btc_tickers() -> List[str]:
         r = requests.get(f"{FtxAPI.base_url}/markets")
         tickers = json.loads(r.text)
@@ -372,18 +382,18 @@ class CoinGecko:
         return data["data"]["market_cap_percentage"]["btc"]
 
 
-class ByBtAPI:
+class CoinglassAPI:
 
-    base_url: str = "https://fapi.bybt.com:443"
+    base_url: str = "https://fapi.coinglass.com"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
         'sec-fetch-site': 'same-site',
         'sec-fetch-mode': 'cors',
         'sec-fetch-dest': 'empty',
-        'referer': 'https://www.bybt.com/',
+        'referer': 'https://www.coinglass.com/',
         'sec-ch-ua-platform': '"macOS"',
         'sec-ch-ua-mobile': '?0',
-        'authority': 'fapi.bybt.com',
+        'authority': 'fapi.coinglass.com',
         'accept-language': 'en-US,en;q=0.9'
     }
 
@@ -393,7 +403,7 @@ class ByBtAPI:
 
     @staticmethod
     def get_open_interest(fill_na: bool = True):
-        url: str = f"{ByBtAPI.base_url}/api/openInterest/v3/chart?symbol=BTC&timeType=0&exchangeName=&type=0"
+        url: str = f"{CoinglassAPI.base_url}/api/openInterest/v3/chart?symbol=BTC&timeType=0&exchangeName=&type=0"
         r = os.popen(f'curl -X GET "{url}"').read()
         data = json.loads(r)["data"]
 
@@ -401,7 +411,7 @@ class ByBtAPI:
         for exchange, oi_data in data["dataMap"].items():
             oi_data = pd.Series(
                 oi_data,
-                index=[ByBtAPI.format_unix_time(d) for d in data["dateList"]],
+                index=[CoinglassAPI.format_unix_time(d) for d in data["dateList"]],
                 name=f"{exchange} Open Interest"
             )
             if fill_na:
