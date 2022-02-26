@@ -12,7 +12,7 @@ from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
 from .api import (AltcoinIndexAPI, BinanceAPI, BitkubAPI, CoinglassAPI, CoinGecko,
-                  FearAndGreedAPI, FtxAPI, KucoinAPI, OkexAPI)
+                  FearAndGreedAPI, FtxAPI, KucoinAPI, OkxAPI)
 from .enums.exchange import Exchange
 from .enums.pairs import Pairs
 from .solver import Solver
@@ -218,7 +218,7 @@ def get_cdc_template(
     exchange: Exchange = Exchange.BINANCE,
     current: bool = True) -> str:
     if exchange == Exchange.OKEX:
-        tickers = OkexAPI.get_usdt_tickers() if pair == Pairs.USDT else OkexAPI.get_btc_tickers()
+        tickers = OkxAPI.get_usdt_tickers() if pair == Pairs.USDT else OkxAPI.get_btc_tickers()
     elif exchange == Exchange.BINANCE:
         tickers = BinanceAPI.get_usdt_tickers() if pair == Pairs.USDT else BinanceAPI.get_btc_tickers()
     elif exchange == Exchange.FTX:
@@ -243,7 +243,7 @@ def get_cdc_template(
     sellmore_tickers = []
     for ticker in tickers:
         if exchange == Exchange.OKEX:
-            candle_data = OkexAPI.generate_candle_data(ticker)
+            candle_data = OkxAPI.generate_candle_data(ticker)
         elif exchange == Exchange.FTX:
             candle_data = FtxAPI.generate_candle_data(ticker)
         elif exchange == Exchange.BINANCE:
