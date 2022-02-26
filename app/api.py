@@ -36,7 +36,7 @@ class OkxAPI:
         payload = {'instId': instrument_id, 'bar': '1D'}
         r = requests.get(f"{OkxAPI.base_url}/api/v5/market/history-candles", params=payload)
         klines = json.loads(r.text)['data']
-        print(klines)
+        #print(klines)
         candle_data = []
         timestamp = []
         for l in klines:
