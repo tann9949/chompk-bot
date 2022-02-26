@@ -12,31 +12,35 @@ from bs4 import BeautifulSoup
 from requests.models import Response
 
 
-class OkexAPI:
+class OkxAPI:
 
-    base_url: str = "https://www.okex.com"
+    base_url: str = "https://www.okx.com"
     gran_mapping: Dict[str, int] = {
         "15min": 900,
         "30min": 1800,
         "1h": 3600,
         "4h": 14400,
         "12h": 43200,
-        "1d": 86400,
+        "1D": 86400,
         "1W": 604800,
         "1M": 2678400
     }
+    def format_unixtime(unix_time: int):
+        return datetime.utcfromtimestamp(int(str(unix_time)[:-3]))
 
     @staticmethod
     def generate_candle_data(
         instrument_id: str,
-        granularity: str = "1d") -> pd.DataFrame:
-        timeframe = OkexAPI.gran_mapping[granularity]
-        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/{instrument_id}/candles?granularity={timeframe}")
-        klines = json.loads(r.text)
+        granularity: str = "1D") -> pd.DataFrame:
+        timeframe = OkxAPI.gran_mapping[granularity]
+        payload = {'instId': instrument_id, 'bar': '1D'}
+        r = requests.get(f"{OkxAPI.base_url}/api/v5/market/history-candles", params=payload)
+        klines = json.loads(r.text)['data']
+        #print(klines)
         candle_data = []
         timestamp = []
         for l in klines:
-            open_time = datetime.strptime(l[0], "%Y-%m-%dT%H:%M:%S.000Z")
+            open_time = OkxAPI.format_unixtime(l[0])
             timestamp.append(open_time)
             volume = l[5]
             high, low, op, close = l[2], l[3], l[1], l[4]
@@ -45,37 +49,38 @@ class OkexAPI:
         return candle_data.astype(float).resample("1D").mean()
 
     def get_usdt_tickers() -> List[str]:
-        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
-        tickers = json.loads(r.text)
+        r = requests.get(f"{OkxAPI.base_url}/api/v5/market/tickers?instType=SPOT")
+        tickers = json.loads(r.text)['data']
+        #print(tickers)
         return [
-            ticker["instrument_id"]
+            ticker["instId"]
             for ticker in tickers
             if (
-                ticker["instrument_id"][:3] != "USDT"
-                and "USDT" in ticker["instrument_id"]
-                and "DOWN" not in ticker["instrument_id"]
-                and "BEAR" not in ticker["instrument_id"]
-                and "BULL" not in ticker["instrument_id"]
-                and "DAI" not in ticker["instrument_id"]
-                and ticker["instrument_id"].count("USDT") == 1
+                ticker["instId"][:3] != "USDT"
+                and "USDT" in ticker["instId"]
+                and "DOWN" not in ticker["instId"]
+                and "BEAR" not in ticker["instId"]
+                and "BULL" not in ticker["instId"]
+                and "DAI" not in ticker["instId"]
+                and ticker["instId"].count("USDT") == 1
             )
         ]
     
     def get_btc_tickers() -> List[str]:
-        r = requests.get(f"{OkexAPI.base_url}/api/spot/v3/instruments/ticker")
-        tickers = json.loads(r.text)
+        r = requests.get(f"{OkxAPI.base_url}/api/v5/market/tickers?instType=SPOT")
+        tickers = json.loads(r.text)['data']
         return [
-            ticker["instrument_id"]
+            ticker["instId"]
             for ticker in tickers
             if (
-                ticker["instrument_id"][:3] != "BTC"
-                and "USD" not in ticker["instrument_id"] 
-                and "BTC" in ticker["instrument_id"]
-                and "DOWN" not in ticker["instrument_id"]
-                and "BEAR" not in ticker["instrument_id"]
-                and "BULL" not in ticker["instrument_id"]
-                and "DAI" not in ticker["instrument_id"]
-                and ticker["instrument_id"].count("BTC") == 1
+                ticker["instId"][:3] != "BTC"
+                and "USD" not in ticker["instId"] 
+                and "BTC" in ticker["instId"]
+                and "DOWN" not in ticker["instId"]
+                and "BEAR" not in ticker["instId"]
+                and "BULL" not in ticker["instId"]
+                and "DAI" not in ticker["instId"]
+                and ticker["instId"].count("BTC") == 1
             )
         ]
 
