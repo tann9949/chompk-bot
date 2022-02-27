@@ -1,14 +1,11 @@
 import logging
-import os
 from datetime import datetime
 from functools import partial
 
 import telegram
 from telegram.ext import CommandHandler, Dispatcher, Updater
-from telegram.ext.filters import Filters
-from telegram.ext.messagehandler import MessageHandler
 
-from .callback import CallBacks, get_bitcion_template, get_cdc_template
+from .callback import CallBacks, get_cdc_template
 from .enums.exchange import Exchange
 from .enums.pairs import Pairs
 

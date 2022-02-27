@@ -1,14 +1,14 @@
-import datetime
 import json
+from datetime import datetime
 from typing import List
 
 import pandas as pd
 import requests
 
-from exchanges.base_exchange import BaseExchange
+from exchanges.base_exchange import ExchangeAPI
 
 
-class BinanceAPI(BaseExchange):
+class BinanceAPI(ExchangeAPI):
     base_url: str = "https://api.binance.com"
 
     @staticmethod
