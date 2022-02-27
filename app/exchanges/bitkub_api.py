@@ -1,13 +1,12 @@
 import json
 import time
 from datetime import datetime
-from plistlib import Dict
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
 import requests
 
-from exchanges.base_exchange import ExchangeAPI
+from app.exchanges.base_exchange import ExchangeAPI
 
 
 class BitkubAPI(ExchangeAPI):
