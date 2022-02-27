@@ -10,10 +10,10 @@ import pandas as pd
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
-from exchanges.exchange_provider import ExchangeProvider
 from .api import (AltCoinIndexAPI, CoinGlassAPI, CoinGecko, FearAndGreedAPI)
 from .enums.exchange import Exchange
 from .enums.pairs import Pairs
+from .exchanges.exchange_provider import ExchangeProvider
 from .solver import Solver
 from .technical_analysis import TechnicalAnalysis as ta
 from .utils import send_message, send_photo

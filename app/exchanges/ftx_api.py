@@ -5,7 +5,7 @@ from typing import Dict, List
 import pandas as pd
 import requests
 
-from exchanges.base_exchange import ExchangeAPI
+from app.exchanges import ExchangeAPI
 
 
 class FtxAPI(ExchangeAPI):

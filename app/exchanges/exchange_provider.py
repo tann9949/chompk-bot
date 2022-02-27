@@ -1,7 +1,7 @@
 from typing import Dict
 
-from enums.exchange import Exchange
-from exchanges import (ExchangeAPI, BitkubAPI, BinanceAPI, OkxAPI, KucoinAPI, FtxAPI)
+from app.enums.exchange import Exchange
+from app.exchanges import (ExchangeAPI, BinanceAPI, BitkubAPI, OkxAPI, FtxAPI, KucoinAPI)
 
 
 class ExchangeAPINotFoundException(Exception):
