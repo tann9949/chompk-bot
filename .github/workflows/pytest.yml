@@ -24,3 +24,5 @@ jobs:
     - name: Run Pytest
       run: |
         py.test
+      env:
+        TOKEN: ${{ secrets.BOT_TOKEN }}
