@@ -62,13 +62,15 @@ class CallBacks:
     ) -> None:
         args: List[str] = context.args
         if len(args) != 1:
-            send_message(update.effective_chat.id, context, "Please parse exchange as an argument!")
+            send_message(update.effective_chat.id, context,
+                         "Please parse exchange as an argument!")
             return
 
         exchange: str = args[0].lower().strip()
         oi_data: Dict[str, pd.Series] = CoinGlassAPI.get_open_interest()
         if exchange not in oi_data.keys():
-            send_message(update.effective_chat.id, context, f"Unrecognize exchange: {exchange}")
+            send_message(update.effective_chat.id, context,
+                         f"Unrecognize exchange: {exchange}")
             return
         oi: pd.Series = oi_data[exchange][-300:]
 
@@ -83,24 +85,29 @@ class CallBacks:
                    f"    ${oi[-1]:,} ({oi_gain_fmt}%)\n\n"
 
         # format image
-        btcusdt: pd.Series = BinanceAPI.generate_candle_data("BTCUSDT")["close"][-300:]
+        btcusdt: pd.Series = BinanceAPI.generate_candle_data("BTCUSDT")[
+            "close"][-300:]
         fig, ax = plt.subplots(figsize=(10, 6))
 
         ax.plot(oi.index, oi.values)
-        ax.axhline(oi[-1], linestyle="--", alpha=0.4, color="black", label="Future Open Interest (USD)")
+        ax.axhline(oi[-1], linestyle="--", alpha=0.4,
+                   color="black", label="Future Open Interest (USD)")
         ax.get_yaxis().set_major_formatter(
             FuncFormatter(lambda x, p: format(int(x), ','))
         )
 
         ax2 = ax.twinx()
-        ax2.plot(btcusdt.index, btcusdt.values, color="orange", alpha=0.7, label="BTCUSDT (close)")
-        ax2.axhline(btcusdt.values[-1], linestyle="--", alpha=0.2, color="brown")
+        ax2.plot(btcusdt.index, btcusdt.values, color="orange",
+                 alpha=0.7, label="BTCUSDT (close)")
+        ax2.axhline(btcusdt.values[-1],
+                    linestyle="--", alpha=0.2, color="brown")
         ax2.get_yaxis().set_major_formatter(
             FuncFormatter(lambda x, p: format(int(x), ','))
         )
 
         ax.label_outer()
-        fig.suptitle(f'{exchange} Open Interest', fontweight="bold", fontsize=24)
+        fig.suptitle(f'{exchange} Open Interest',
+                     fontweight="bold", fontsize=24)
         lgd = fig.legend()
         plt.savefig(img_path, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
@@ -116,7 +123,8 @@ class CallBacks:
         else:
             pair = args[0].lower().strip()
         if pair not in ["usdt", "btc"]:
-            send_message(update.effective_chat.id, context, f"Unrecognized argument: {pair}. Only usdt|btc available")
+            send_message(update.effective_chat.id, context,
+                         f"Unrecognized argument: {pair}. Only usdt|btc available")
             return
 
         send_message(
@@ -163,7 +171,8 @@ class CallBacks:
                     text=template
                 )
             except AssertionError as e:
-                logging.info(f"cannot compute with the following error message:\n{e}")
+                logging.info(
+                    f"cannot compute with the following error message:\n{e}")
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=f"Unrecognize pair name `{symbol}` on Binance"
@@ -175,7 +184,8 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
     fig = plt.figure(figsize=(10, 10))
     gs = fig.add_gridspec(3, hspace=0)
     axs = gs.subplots(sharex=True)
-    fig.suptitle(f'Bitcoin Dashboard\n{current_time}', fontweight="bold", fontsize=24)
+    fig.suptitle(
+        f'Bitcoin Dashboard\n{current_time}', fontweight="bold", fontsize=24)
 
     # aggregated open interest
     iterator = [
@@ -197,10 +207,13 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
 
         ax2 = axs[i].twinx()
         if i == 0:
-            ax2.plot(data.index, data["close"].values, color="orange", alpha=0.7, label="BTCUSDT (close)")
+            ax2.plot(data.index, data["close"].values,
+                     color="orange", alpha=0.7, label="BTCUSDT (close)")
         else:
-            ax2.plot(data.index, data["close"].values, color="orange", alpha=0.7)
-        ax2.axhline(data["close"].values[-1], linestyle="--", alpha=0.2, color="brown")
+            ax2.plot(data.index, data["close"].values,
+                     color="orange", alpha=0.7)
+        ax2.axhline(data["close"].values[-1],
+                    linestyle="--", alpha=0.2, color="brown")
         ax2.get_yaxis().set_major_formatter(
             FuncFormatter(lambda x, p: format(int(x), ','))
         )
@@ -277,7 +290,8 @@ def get_bitcoin_template(img_path: str) -> str:
     fng_idx: pd.Series = FearAndGreedAPI.get_historical_data()
     logging.info("Finish fetching!")
 
-    smooth_alt_idx = pd.Series(ta.sma(altcoin_idx, 2), index=altcoin_idx.index, name="Altcoin Season Index")
+    smooth_alt_idx = pd.Series(
+        ta.sma(altcoin_idx, 2), index=altcoin_idx.index, name="Altcoin Season Index")
     aggregated_oi: pd.Series = pd.Series(
         np.array([
             x.resample("1D").mean().values
@@ -287,10 +301,12 @@ def get_bitcoin_template(img_path: str) -> str:
         name="Aggregated Open Interest"
     )
 
-    oi_gain: float = (aggregated_oi[-1] - aggregated_oi[-2]) / aggregated_oi[-2]
+    oi_gain: float = (aggregated_oi[-1] -
+                      aggregated_oi[-2]) / aggregated_oi[-2]
     oi_gain_fmt: str = f"+{oi_gain * 100:.2f}" if oi_gain > 0 else f"{oi_gain * 100:.2f}"
 
-    altcoin_idx_gain: float = (float(altcoin_idx[-1]) - float(altcoin_idx[-2])) / float(altcoin_idx[-2])
+    altcoin_idx_gain: float = (
+        float(altcoin_idx[-1]) - float(altcoin_idx[-2])) / float(altcoin_idx[-2])
     altcoin_idx_gain_fmt: str = f"+{altcoin_idx_gain * 100:.2f}" if altcoin_idx_gain > 0 else f"{altcoin_idx_gain * 100:.2f}"
 
     if altcoin_idx[-1] >= 75:  # alt party
@@ -328,6 +344,7 @@ def get_bitcoin_template(img_path: str) -> str:
                         f"    {altcoin_idx[-1]} ({altcoin_idx_gain_fmt}%)\n" + \
                         f"    {season}\n"
 
-    dataset = btc_usdt_candle[["close"]].join(smooth_alt_idx).join(fng_idx).join(aggregated_oi)
+    dataset = btc_usdt_candle[["close"]].join(
+        smooth_alt_idx).join(fng_idx).join(aggregated_oi)
     generate_image(dataset.iloc[-300:], img_path)
     return btc_template
