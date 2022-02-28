@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 from app.bot import Bot
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
