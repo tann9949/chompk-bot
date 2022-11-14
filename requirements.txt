@@ -1,10 +1,11 @@
-python-telegram-bot
+click
+bs4
+dydx-v3-python
 matplotlib
 numpy
 pandas
-requests
-python-dotenv
-bs4
-strenum
-click
 pytest
+python-telegram-bot
+python-dotenv
+requests
+strenum
