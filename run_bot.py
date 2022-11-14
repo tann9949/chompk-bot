@@ -13,7 +13,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 def init_dotenv():
     load_dotenv()
 
-    token = os.getenv("TOKEN", "TOKEN")
+    token = os.getenv("BOT_TOKEN", "TOKEN")
     chat_id = os.getenv("CHAT_ID", "CHAT_ID")
     return {"token": token, "chat_id": chat_id}
 

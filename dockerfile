@@ -2,10 +2,9 @@ FROM python:3.8
 
 WORKDIR /workspace
 
-COPY ../requirements.txt ./
+COPY . .
 RUN pip3 install python-telegram-bot
 RUN pip3 install -r requirements.txt
 
-COPY .. .
 
-ENTRYPOINT [ "python3", "main.py" ]
+ENTRYPOINT [ "python3", "run_bot.py" ]
