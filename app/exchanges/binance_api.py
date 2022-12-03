@@ -38,6 +38,7 @@ class BinanceAPI(ExchangeAPI):
     def get_usdt_tickers() -> List[str]:
         r = requests.get(f"{BinanceAPI.base_url}/api/v3/ticker/price")
         tickers = json.loads(r.text)
+        print(tickers)
         return [
             ticker["symbol"]
             for ticker in tickers
