@@ -21,12 +21,6 @@ def test_binance():
     get_cdc_template(Pairs.BTC, Exchange.BINANCE)
 
 
-def test_ftx():
-    get_cdc_template(Pairs.USDT, Exchange.FTX)
-    get_cdc_template(Pairs.PERP, Exchange.FTX)
-    get_cdc_template(Pairs.BTC, Exchange.FTX)
-
-
 def test_kucoin():
     get_cdc_template(Pairs.USDT, Exchange.KUCOIN)
     get_cdc_template(Pairs.BTC, Exchange.KUCOIN)
