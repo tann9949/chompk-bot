@@ -1,9 +1,9 @@
-import logging
 from datetime import datetime
 from functools import partial
 
 import telegram
-from telegram.ext import CommandHandler, Dispatcher, Updater
+from loguru import logger
+from telegram.ext import CommandHandler, Updater
 
 from .callback import CallBacks, get_cdc_template
 from .enums.exchange import Exchange
@@ -14,17 +14,22 @@ class Bot:
     def __init__(self, token: str) -> None:
         self.token: str = token
 
-    def send_message_to_chat(self, chat_id: str, exchange: Exchange, img_path: str = "tmp.png") -> None:
+    async def hello(self, chat_id: str) -> None:
         bot: telegram.Bot = telegram.Bot(token=self.token)
-        logging.info("Calling Dashboard callbacks")
+
+        await bot.send_message(chat_id=chat_id, text="Hello world!")
+
+    async def send_message_to_chat(self, chat_id: str, exchange: Exchange, img_path: str = "tmp.png") -> None:
+        bot: telegram.Bot = telegram.Bot(token=self.token)
+        logger.info("Calling Dashboard callbacks")
         
         if exchange == Exchange.BITKUB:
             cdc_thb_template = get_cdc_template(Pairs.THB, exchange)
-            # btc_template = get_bitcion_template(img_path)
+            # btc_template = get_bitcoin_template(img_path)
 
             current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-            bot.send_message(chat_id=chat_id, text=current_time)
-            bot.send_message(chat_id=chat_id, text=cdc_thb_template)
+            await bot.send_message(chat_id=chat_id, text=current_time)
+            await bot.send_message(chat_id=chat_id, text=cdc_thb_template)
         elif exchange == Exchange.FTX:
             cdc_usdt_template = get_cdc_template(Pairs.USDT, exchange)
             cdc_perp_template = get_cdc_template(Pairs.PERP, exchange)
@@ -32,19 +37,20 @@ class Bot:
             # btc_template = get_bitcion_template(img_path)
 
             current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-            bot.send_message(chat_id=chat_id, text=current_time)
-            bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
-            bot.send_message(chat_id=chat_id, text=cdc_perp_template)
-            bot.send_message(chat_id=chat_id, text=cdc_btc_template)
+            await bot.send_message(chat_id=chat_id, text=current_time)
+            await bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
+            await bot.send_message(chat_id=chat_id, text=cdc_perp_template)
+            await bot.send_message(chat_id=chat_id, text=cdc_btc_template)
         else:
+            await bot.send_message(chat_id, text="Hello world")
             cdc_usdt_template = get_cdc_template(Pairs.USDT, exchange)
-            cdc_btc_template = get_cdc_template(Pairs.BTC, exchange)
+            # cdc_btc_template = get_cdc_template(Pairs.BTC, exchange)
             # btc_template = get_bitcion_template(img_path)
 
             current_time: str = f"🕒 (UTC) {datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
-            bot.send_message(chat_id=chat_id, text=current_time)
-            bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
-            bot.send_message(chat_id=chat_id, text=cdc_btc_template)
+            await bot.send_message(chat_id=chat_id, text=current_time)
+            await bot.send_message(chat_id=chat_id, text=cdc_usdt_template)
+            # bot.send_message(chat_id=chat_id, text=cdc_btc_template)
             
         
         # bot.send_message(chat_id=chat_id, text=btc_template)
@@ -60,7 +66,7 @@ class Bot:
         # bot.send_message(chat_id=chat_id, text=donate_template)
 
     def run(self) -> None:
-        logging.info(f"Starting bot...")
+        logger.info(f"Starting bot...")
         updater: Updater = Updater(token=self.token, use_context=True)
         dispatcher: Dispatcher = updater.dispatcher
 

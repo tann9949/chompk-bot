@@ -1,15 +1,12 @@
-import logging
 import os
 import os.path
 import sys
 
 import click
 from dotenv import load_dotenv
+from loguru import logger
 
 from app.bot import Bot
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -40,9 +37,10 @@ def main(exchange: str):
     env = init_dotenv()
     exchange = exchange.lower().strip()
 
-    logging.info(f"sending summary from {exchange}")
+    logger.info(f"sending summary from {exchange}")
 
     bot = Bot(token=env["token"])
+
     bot.send_message_to_chat(env["chat_id"][exchange], exchange)
 
 

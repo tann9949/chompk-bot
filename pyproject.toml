@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "chompk-bot"
+version = "0.1.0"
+description = ""
+authors = ["Natawat Kwanpum <natawat.nueng@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "chompk_bot" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+click = "^8.1.7"
+bs4 = "^0.0.2"
+dydx-v3-python = "^2.1.0"
+matplotlib = "^3.8.4"
+numpy = "^1.26.4"
+pandas = "^2.2.1"
+pytest = "^8.1.1"
+python-telegram-bot = "^21.0.1"
+python-dotenv = "^1.0.1"
+requests = "^2.31.0"
+strenum = "^0.4.15"
+loguru = "^0.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,7 +1,3 @@
-import os
-
-from dotenv import load_dotenv
-
 from app.callback import get_cdc_template
 from app.enums.exchange import Exchange
 from app.enums.pairs import Pairs

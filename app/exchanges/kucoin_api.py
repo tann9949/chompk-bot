@@ -1,11 +1,11 @@
 import json
-import logging
 import time
 from datetime import datetime
 from typing import List
 
 import pandas as pd
 import requests
+from loguru import logger
 
 from app.exchanges.base_exchange import ExchangeAPI
 
@@ -26,7 +26,7 @@ class KucoinAPI(ExchangeAPI):
             if n_attempt > max_attempt:
                 return None
 
-            logging.warning(f"Error fetching API. Retrying in 0.1 seconds")
+            logger.warning(f"Error fetching API. Retrying in 0.1 seconds")
 
             time.sleep(0.1)
             r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})

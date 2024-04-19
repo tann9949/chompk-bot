@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 from datetime import datetime
@@ -7,6 +6,7 @@ from typing import Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from loguru import logger
 from matplotlib.ticker import FuncFormatter
 from telegram.ext import CallbackContext, Updater
 
@@ -31,7 +31,7 @@ class CallBacks:
         - show value fear and greed, open interest, altcoin season index, bitcoin dominance
         - show Pairs that CDC Action zone will have buy/sell or buy more/sell more signal
         """
-        logging.info("Calling Dashboard callbacks")
+        logger.info("Calling Dashboard callbacks")
         chat_id: str = update.effective_chat.id if chat_id is None else chat_id
 
         current_time: str = f"{datetime.strftime(datetime.now(), '%d-%m-%Y %H:%M:%S')}"
@@ -74,7 +74,7 @@ class CallBacks:
             return
         oi: pd.Series = oi_data[exchange][-300:]
 
-        logging.info(f"Calling Open Interest Callback on {exchange}")
+        logger.info(f"Calling Open Interest Callback on {exchange}")
 
         # format text
         oi_gain: float = (oi[-1] - oi[-2]) / oi[-2]
@@ -161,7 +161,7 @@ class CallBacks:
             symbol = coin + "USDT"
             interval = "1d"
 
-            logging.info(f"computing {symbol} pair...")
+            logger.info(f"computing {symbol} pair...")
 
             try:
                 candle_data = BinanceAPI.generate_candle_data(symbol, interval)
@@ -171,7 +171,7 @@ class CallBacks:
                     text=template
                 )
             except AssertionError as e:
-                logging.info(
+                logger.info(
                     f"cannot compute with the following error message:\n{e}")
                 context.bot.send_message(
                     chat_id=update.effective_chat.id,
@@ -225,7 +225,7 @@ def generate_image(data: pd.DataFrame, save_path: str) -> None:
 
 
 def get_cdc_template(
-        pair: str = "usdt",
+        pair: Pairs = Pairs.USDT,
         exchange: Exchange = Exchange.BINANCE,
         current: bool = True) -> str:
     exchange_api = ExchangeProvider.provide(exchange)
@@ -253,7 +253,7 @@ def get_cdc_template(
             continue
 
         signal = Solver.get_cdc_signal(candle_data["close"], current=current)
-        logging.info(f"Ticker ({ticker}) is {signal}")
+        logger.info(f"Ticker ({ticker}) is {signal}")
 
         if signal == "buy":
             buy_tickers.append(re.sub(r"-|/|_", "", ticker))
@@ -280,15 +280,15 @@ def get_cdc_template(
 
 def get_bitcoin_template(img_path: str) -> str:
     btc_dominance: float = CoinGecko.get_btc_dominance()
-    logging.info("Fetching BTC Price...")
+    logger.info("Fetching BTC Price...")
     btc_usdt_candle: pd.DataFrame = BinanceAPI.generate_candle_data("BTCUSDT")
-    logging.info("Fetching Altcoin Index...")
+    logger.info("Fetching Altcoin Index...")
     oi: Dict[str, pd.Series] = CoinGlassAPI.get_open_interest()
-    logging.info("Fetching Fear and Greed Index...")
+    logger.info("Fetching Fear and Greed Index...")
     altcoin_idx: pd.Series = AltCoinIndexAPI.get_historical_altcoin_index()
-    logging.info("Fetching Bitcoin Aggregated Open Interest...")
+    logger.info("Fetching Bitcoin Aggregated Open Interest...")
     fng_idx: pd.Series = FearAndGreedAPI.get_historical_data()
-    logging.info("Finish fetching!")
+    logger.info("Finish fetching!")
 
     smooth_alt_idx = pd.Series(
         ta.sma(altcoin_idx, 2), index=altcoin_idx.index, name="Altcoin Season Index")

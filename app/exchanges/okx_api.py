@@ -4,6 +4,7 @@ from typing import Dict, List
 
 import pandas as pd
 import requests
+
 from app.exchanges.base_exchange import ExchangeAPI
 
 

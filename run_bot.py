@@ -1,13 +1,8 @@
 import os
-import logging
-from typing import Any, Dict
 
 from dotenv import load_dotenv
 
 from app.bot import Bot
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def init_dotenv():
