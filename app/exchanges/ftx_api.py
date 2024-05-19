@@ -18,13 +18,11 @@ class FtxAPI(ExchangeAPI):
         "12h": 43200,
         "1d": 86400,
         "1W": 604800,
-        "1M": 2678400
+        "1M": 2678400,
     }
 
     @staticmethod
-    def generate_candle_data(
-            market_name: str,
-            resolution: str = "1d") -> pd.DataFrame:
+    def generate_candle_data(market_name: str, resolution: str = "1d") -> pd.DataFrame:
         timeframe = FtxAPI.reso_mapping[resolution]
 
         url: str = f"{FtxAPI.base_url}/markets/{market_name}/candles?resolution={timeframe}"  # &start_time={start_time}&end_time={end_time}"
@@ -38,9 +36,18 @@ class FtxAPI(ExchangeAPI):
             open_time = datetime.strptime(line["startTime"], "%Y-%m-%dT%H:%M:%S+00:00")
             timestamp.append(open_time)
             volume = line["volume"]
-            high, low, op, close = line["high"], line["low"], line["open"], line["close"]
+            high, low, op, close = (
+                line["high"],
+                line["low"],
+                line["open"],
+                line["close"],
+            )
             candle_data.append([op, close, high, low, volume])
-        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
+        candle_data = pd.DataFrame(
+            candle_data,
+            columns=["open", "close", "high", "low", "volume"],
+            index=timestamp,
+        )
         return candle_data.astype(float).resample("1D").mean()
 
     @staticmethod
@@ -51,17 +58,17 @@ class FtxAPI(ExchangeAPI):
             ticker["name"]
             for ticker in tickers["result"]
             if (
-                    ticker["name"][:3] != "USD"
-                    and "USD" in ticker["name"]
-                    and "USDT" not in ticker["name"]
-                    and "UP" not in ticker["name"]
-                    and "DOWN" not in ticker["name"]
-                    and "HALF/" not in ticker["name"]
-                    and "HEDGE/" not in ticker["name"]
-                    and "BEAR" not in ticker["name"]
-                    and "BULL" not in ticker["name"]
-                    and ticker["name"].count("USD") == 1
-                    and "DAI" not in ticker["name"]
+                ticker["name"][:3] != "USD"
+                and "USD" in ticker["name"]
+                and "USDT" not in ticker["name"]
+                and "UP" not in ticker["name"]
+                and "DOWN" not in ticker["name"]
+                and "HALF/" not in ticker["name"]
+                and "HEDGE/" not in ticker["name"]
+                and "BEAR" not in ticker["name"]
+                and "BULL" not in ticker["name"]
+                and ticker["name"].count("USD") == 1
+                and "DAI" not in ticker["name"]
             )
         ]
 
@@ -70,9 +77,7 @@ class FtxAPI(ExchangeAPI):
         r = requests.get(f"{FtxAPI.base_url}/markets")
         tickers = json.loads(r.text)
         return [
-            ticker["name"]
-            for ticker in tickers["result"]
-            if "PERP" in ticker["name"]
+            ticker["name"] for ticker in tickers["result"] if "PERP" in ticker["name"]
         ]
 
     @staticmethod
@@ -82,18 +87,17 @@ class FtxAPI(ExchangeAPI):
 
         return [
             ticker["name"]
-
             for ticker in tickers["result"]
             if (
-                    ticker["name"][:3] != "BTC"
-                    and "USD" not in ticker["name"]
-                    and "BTC" in ticker["name"]
-                    and "UP" not in ticker["name"]
-                    and "DOWN" not in ticker["name"]
-                    and "BEAR" not in ticker["name"]
-                    and "BULL" not in ticker["name"]
-                    and ticker["name"].count("BTC") == 1
-                    and "DAI" not in ticker["name"]
-                    and "-" not in ticker["name"]
+                ticker["name"][:3] != "BTC"
+                and "USD" not in ticker["name"]
+                and "BTC" in ticker["name"]
+                and "UP" not in ticker["name"]
+                and "DOWN" not in ticker["name"]
+                and "BEAR" not in ticker["name"]
+                and "BULL" not in ticker["name"]
+                and ticker["name"].count("BTC") == 1
+                and "DAI" not in ticker["name"]
+                and "-" not in ticker["name"]
             )
         ]

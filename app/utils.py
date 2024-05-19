@@ -20,7 +20,7 @@ def send_message(chat_id, context, message) -> None:
             continue
 
 
-def send_photo(chat_id, context, img_path, message = "") -> None:
+def send_photo(chat_id, context, img_path, message="") -> None:
     is_sent: bool = False
     while not is_sent:
         try:

@@ -8,8 +8,11 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from app.bot import Bot
+from app.callback import get_cdc_template
+from app.enums.exchange import Exchange
+from app.enums.pairs import Pairs
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 
 def init_dotenv():
@@ -27,12 +30,12 @@ def init_dotenv():
             "okex": okex_chat_id,
             "kucoin": kucoin_chat_id,
             "bitkub": bitkub_chat_id,
-        }
+        },
     }
 
 
 @click.command()
-@click.option('--exchange', default="binance", help='pair binance/okex')
+@click.option("--exchange", default="binance", help="pair binance/okex")
 def main(exchange: str):
     # load .env and unpack
     env = init_dotenv()
@@ -46,4 +49,5 @@ def main(exchange: str):
 
 
 if __name__ == "__main__":
-    main()
+    get_cdc_template(Pairs.USDT, Exchange.BINANCE)
+    # main()

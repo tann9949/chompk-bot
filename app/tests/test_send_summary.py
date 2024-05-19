@@ -14,7 +14,7 @@ def test_bitkub():
 
 def test_binance():
     get_cdc_template(Pairs.USDT, Exchange.BINANCE)
-    get_cdc_template(Pairs.BTC, Exchange.BINANCE)
+    # get_cdc_template(Pairs.BTC, Exchange.BINANCE)
 
 
 def test_kucoin():

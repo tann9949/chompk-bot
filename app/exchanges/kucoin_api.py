@@ -15,10 +15,12 @@ class KucoinAPI(ExchangeAPI):
 
     @staticmethod
     def generate_candle_data(
-            symbol: str,
-            interval: str = "1day",
-            max_attempt: int = 10) -> pd.DataFrame:
-        r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})
+        symbol: str, interval: str = "1day", max_attempt: int = 10
+    ) -> pd.DataFrame:
+        r = requests.get(
+            f"{KucoinAPI.base_url}/api/v1/market/candles",
+            {"symbol": symbol, "type": interval},
+        )
         klines = json.loads(r.text)
 
         n_attempt = 0
@@ -29,20 +31,29 @@ class KucoinAPI(ExchangeAPI):
             logger.warning("Error fetching API. Retrying in 0.1 seconds")
 
             time.sleep(0.1)
-            r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})
+            r = requests.get(
+                f"{KucoinAPI.base_url}/api/v1/market/candles",
+                {"symbol": symbol, "type": interval},
+            )
             klines = json.loads(r.text)
             n_attempt += 1
 
         candle_data = []
         timestamp = []
-        for l in klines["data"]:
-            open_time = (datetime.utcfromtimestamp(int(l[0])).strftime('%Y-%m-%d %H:%M:%S'))
+        for line in klines["data"]:
+            open_time = datetime.utcfromtimestamp(int(line[0])).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             timestamp.append(open_time)
-            # end_time = datetime.utcfromtimestamp(l[6])
-            volume = l[5]
-            high, low, op, close = l[3], l[4], l[1], l[2]
+            # end_time = datetime.utcfromtimestamp(line[6])
+            volume = line[5]
+            high, low, op, close = line[3], line[4], line[1], line[2]
             candle_data.append([op, close, high, low, volume])
-        candle_data = pd.DataFrame(candle_data, columns=["open", "close", "high", "low", "volume"], index=timestamp)
+        candle_data = pd.DataFrame(
+            candle_data,
+            columns=["open", "close", "high", "low", "volume"],
+            index=timestamp,
+        )
         return candle_data.astype(float)[::-1]
 
     @staticmethod
@@ -53,16 +64,16 @@ class KucoinAPI(ExchangeAPI):
             ticker["symbol"]
             for ticker in tickers["data"]
             if (
-                    ticker["symbol"][:4] != "USDT"
-                    and "USDT" in ticker["symbol"]
-                    and "UP" not in ticker["symbol"]
-                    and "DOWN" not in ticker["symbol"]
-                    and "BEAR" not in ticker["symbol"]
-                    and "BULL" not in ticker["symbol"]
-                    and "3L" not in ticker["symbol"]
-                    and "3S" not in ticker["symbol"]
-                    and ticker["symbol"].count("USD") == 1
-                    and "DAI" not in ticker["symbol"]
+                ticker["symbol"][:4] != "USDT"
+                and "USDT" in ticker["symbol"]
+                and "UP" not in ticker["symbol"]
+                and "DOWN" not in ticker["symbol"]
+                and "BEAR" not in ticker["symbol"]
+                and "BULL" not in ticker["symbol"]
+                and "3L" not in ticker["symbol"]
+                and "3S" not in ticker["symbol"]
+                and ticker["symbol"].count("USD") == 1
+                and "DAI" not in ticker["symbol"]
             )
         ]
 
@@ -74,13 +85,13 @@ class KucoinAPI(ExchangeAPI):
             ticker["symbol"]
             for ticker in tickers["data"]
             if (
-                    ticker["symbol"][:3] != "BTC"
-                    and "USD" not in ticker["symbol"]
-                    and "BTC" in ticker["symbol"]
-                    and "DOWN" not in ticker["symbol"]
-                    and "BEAR" not in ticker["symbol"]
-                    and "BULL" not in ticker["symbol"]
-                    and "DAI" not in ticker["symbol"]
-                    and ticker["symbol"].count("BTC") == 1
+                ticker["symbol"][:3] != "BTC"
+                and "USD" not in ticker["symbol"]
+                and "BTC" in ticker["symbol"]
+                and "DOWN" not in ticker["symbol"]
+                and "BEAR" not in ticker["symbol"]
+                and "BULL" not in ticker["symbol"]
+                and "DAI" not in ticker["symbol"]
+                and ticker["symbol"].count("BTC") == 1
             )
         ]

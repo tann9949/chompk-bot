@@ -12,6 +12,7 @@ def init_dotenv():
     chat_id = os.getenv("CHAT_ID", "CHAT_ID")
     return {"token": token, "chat_id": chat_id}
 
+
 def main():
     # load .env and unpack
     env = init_dotenv()
