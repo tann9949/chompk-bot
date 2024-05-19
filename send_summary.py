@@ -1,17 +1,18 @@
-import logging
+import asyncio
 import os
 import os.path
 import sys
 
 import click
 from dotenv import load_dotenv
+from loguru import logger
 
 from app.bot import Bot
+from app.callback import get_cdc_template
+from app.enums.exchange import Exchange
+from app.enums.pairs import Pairs
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 
 def init_dotenv():
@@ -29,22 +30,24 @@ def init_dotenv():
             "okex": okex_chat_id,
             "kucoin": kucoin_chat_id,
             "bitkub": bitkub_chat_id,
-        }
+        },
     }
 
 
 @click.command()
-@click.option('--exchange', default="binance", help='pair binance/okex')
+@click.option("--exchange", default="binance", help="pair binance/okex")
 def main(exchange: str):
     # load .env and unpack
     env = init_dotenv()
     exchange = exchange.lower().strip()
 
-    logging.info(f"sending summary from {exchange}")
+    logger.info(f"sending summary from {exchange}")
 
     bot = Bot(token=env["token"])
-    bot.send_message_to_chat(env["chat_id"][exchange], exchange)
+
+    asyncio.run(bot.send_message_to_chat(env["chat_id"][exchange], exchange))
 
 
 if __name__ == "__main__":
-    main()
+    get_cdc_template(Pairs.USDT, Exchange.BINANCE)
+    # main()

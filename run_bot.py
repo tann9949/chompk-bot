@@ -1,13 +1,8 @@
 import os
-import logging
-from typing import Any, Dict
 
 from dotenv import load_dotenv
 
 from app.bot import Bot
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def init_dotenv():
@@ -16,6 +11,7 @@ def init_dotenv():
     token = os.getenv("BOT_TOKEN", "TOKEN")
     chat_id = os.getenv("CHAT_ID", "CHAT_ID")
     return {"token": token, "chat_id": chat_id}
+
 
 def main():
     # load .env and unpack

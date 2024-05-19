@@ -1,8 +1,7 @@
 from typing import Dict
 
 from app.enums.exchange import Exchange
-from app.exchanges import (ExchangeAPI, BinanceAPI,
-                           BitkubAPI, OkxAPI, FtxAPI, KucoinAPI)
+from app.exchanges import ExchangeAPI, BinanceAPI, BitkubAPI, OkxAPI, FtxAPI, KucoinAPI
 
 
 class ExchangeAPINotFoundException(Exception):
@@ -21,7 +20,6 @@ class ExchangeProvider:
     @staticmethod
     def provide(exchange: Exchange) -> ExchangeAPI:
         if exchange not in ExchangeProvider.exchangeMapper:
-            raise ExchangeAPINotFoundException(
-                f"{exchange} not found in mapper")
+            raise ExchangeAPINotFoundException(f"{exchange} not found in mapper")
 
         return ExchangeProvider.exchangeMapper[exchange]

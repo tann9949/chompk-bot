@@ -13,9 +13,7 @@ class ExchangeAPI(ABC):
 
     @staticmethod
     @abstractmethod
-    def generate_candle_data(
-            symbol: str,
-            interval: str = "1d") -> pd.DataFrame:
+    def generate_candle_data(symbol: str, interval: str = "1d") -> pd.DataFrame:
         pass
 
     @staticmethod
@@ -30,8 +28,12 @@ class ExchangeAPI(ABC):
 
     @classmethod
     def get_perp_tickers(cls) -> List[str]:
-        raise PairNotSupportedException(f'perp ticker is not supported or not implemented by {cls.__name__}')
+        raise PairNotSupportedException(
+            f"perp ticker is not supported or not implemented by {cls.__name__}"
+        )
 
     @classmethod
     def get_thb_tickers(cls) -> List[str]:
-        raise PairNotSupportedException(f'thb ticker is not supported or not implemented by {cls.__name__}')
+        raise PairNotSupportedException(
+            f"thb ticker is not supported or not implemented by {cls.__name__}"
+        )

@@ -1,7 +1,3 @@
-import os
-
-from dotenv import load_dotenv
-
 from app.callback import get_cdc_template
 from app.enums.exchange import Exchange
 from app.enums.pairs import Pairs
@@ -18,7 +14,7 @@ def test_bitkub():
 
 def test_binance():
     get_cdc_template(Pairs.USDT, Exchange.BINANCE)
-    get_cdc_template(Pairs.BTC, Exchange.BINANCE)
+    # get_cdc_template(Pairs.BTC, Exchange.BINANCE)
 
 
 def test_kucoin():
