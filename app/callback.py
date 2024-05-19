@@ -265,7 +265,7 @@ def get_cdc_template(
             sellmore_tickers.append(re.sub(r"-|/|_", "", ticker))
 
     cdc_template: str = f"[{exchange.upper()}]\n" + \
-                        f"CDC Action Zone V3 \n\n" + \
+                        "CDC Action Zone V3 \n\n" + \
                         "(Buy Next Bar) - buy now! 🟢\n" + \
                         f"{' '.join(buy_tickers)}\n\n" + \
                         "(Sell Next Bar) - sell now! 🔴\n" + \
@@ -330,17 +330,17 @@ def get_bitcoin_template(img_path: str) -> str:
     else:  # extreme fear
         fng = "Extreme Fear 😱"
 
-    btc_template: str = f"(₿) Bitcoin Dashboard\n\n" + \
-                        f"Bitcoin Price\n" + \
+    btc_template: str = "(₿) Bitcoin Dashboard\n\n" + \
+                        "Bitcoin Price\n" + \
                         f"    ${btc_usdt_candle['close'].iloc[-1]:,.2f}\n\n" + \
-                        f"💪🏻 Bitcoin Dominance:\n" + \
+                        "💪🏻 Bitcoin Dominance:\n" + \
                         f"    {btc_dominance:.2f}%\n\n" + \
-                        f"💰 Aggregated Open Interest:\n" + \
+                        "💰 Aggregated Open Interest:\n" + \
                         f"    ${aggregated_oi[-1]:,} ({oi_gain_fmt}%)\n\n" + \
-                        f"Fear and Greed Index\n" + \
+                        "Fear and Greed Index\n" + \
                         f"    {fng_idx[-1]} ({fng_gain_fmt}%)\n" + \
                         f"    {fng}\n\n" + \
-                        f"Altcoin Index:\n" + \
+                        "Altcoin Index:\n" + \
                         f"    {altcoin_idx[-1]} ({altcoin_idx_gain_fmt}%)\n" + \
                         f"    {season}\n"
 

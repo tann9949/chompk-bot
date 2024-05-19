@@ -106,15 +106,15 @@ class Solver:
             # print(result_price, diff)
             if abs(diff) < abs(delta) / 10:
                 if ema_diff > 0:
-                    template += f"If today's price closed at $" + f"%.{decimal_place}f" % result_price + ", CDC V3 Action Zone will be bearish"
+                    template += "If today's price closed at $" + f"%.{decimal_place}f" % result_price + ", CDC V3 Action Zone will be bearish"
                 else:
-                    template += f"If today's price closed at $" + f"%.{decimal_place}f" % result_price + ", CDC V3 Action Zone will be bullish"
+                    template += "If today's price closed at $" + f"%.{decimal_place}f" % result_price + ", CDC V3 Action Zone will be bullish"
                 price_diff: float = result_price - current_price
                 sign: str = "+" if price_diff > 0 else "-"
                 percent_diff: float = price_diff / current_price
                 template += f"\nThat will be {sign}$" + f"%.{decimal_place}f" % abs(result_price - current_price) + \
-                            f" ({sign}" + f"%.2f" % abs(percent_diff*100) + \
-                            f"%) from the current price ($" + f"%.{decimal_place}f" % current_price + ")"
+                            f" ({sign}" + "%.2f" % abs(percent_diff*100) + \
+                            "%) from the current price ($" + f"%.{decimal_place}f" % current_price + ")"
                 return result_price, template
             result_price += delta
             n_trial += 1 

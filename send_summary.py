@@ -1,3 +1,4 @@
+import asyncio
 import os
 import os.path
 import sys
@@ -41,7 +42,7 @@ def main(exchange: str):
 
     bot = Bot(token=env["token"])
 
-    bot.send_message_to_chat(env["chat_id"][exchange], exchange)
+    asyncio.run(bot.send_message_to_chat(env["chat_id"][exchange], exchange))
 
 
 if __name__ == "__main__":

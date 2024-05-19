@@ -26,7 +26,7 @@ class KucoinAPI(ExchangeAPI):
             if n_attempt > max_attempt:
                 return None
 
-            logger.warning(f"Error fetching API. Retrying in 0.1 seconds")
+            logger.warning("Error fetching API. Retrying in 0.1 seconds")
 
             time.sleep(0.1)
             r = requests.get(f"{KucoinAPI.base_url}/api/v1/market/candles", {"symbol": symbol, "type": interval})

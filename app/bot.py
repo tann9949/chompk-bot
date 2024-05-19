@@ -42,7 +42,6 @@ class Bot:
             await bot.send_message(chat_id=chat_id, text=cdc_perp_template)
             await bot.send_message(chat_id=chat_id, text=cdc_btc_template)
         else:
-            await bot.send_message(chat_id, text="Hello world")
             cdc_usdt_template = get_cdc_template(Pairs.USDT, exchange)
             # cdc_btc_template = get_cdc_template(Pairs.BTC, exchange)
             # btc_template = get_bitcion_template(img_path)
@@ -66,7 +65,7 @@ class Bot:
         # bot.send_message(chat_id=chat_id, text=donate_template)
 
     def run(self) -> None:
-        logger.info(f"Starting bot...")
+        logger.info("Starting bot...")
         updater: Updater = Updater(token=self.token, use_context=True)
         dispatcher: Dispatcher = updater.dispatcher
 

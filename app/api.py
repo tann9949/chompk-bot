@@ -125,7 +125,7 @@ class AltCoinIndexAPI:
 
 
 class FearAndGreedAPI:
-    api_url: str = "https://alternative.me/api/crypto/fear-and-greed-index/history";
+    api_url: str = "https://alternative.me/api/crypto/fear-and-greed-index/history"
 
     @staticmethod
     def get_historical_data(days: int = 300) -> Series:
@@ -140,7 +140,7 @@ class FearAndGreedAPI:
         )
 
         if response.status_code != 200:
-            raise ConnectionError(f"Cannot fetch Fear and Greed Index: " + response.text)
+            raise ConnectionError("Cannot fetch Fear and Greed Index: " + response.text)
 
         data: Dict[str, Any] = json.loads(response.text)["data"]
 
