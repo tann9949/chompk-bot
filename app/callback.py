@@ -14,6 +14,7 @@ from telegram.ext import CallbackContext, Updater
 from .api import AltCoinIndexAPI, CoinGlassAPI, CoinGecko, FearAndGreedAPI
 from .enums.exchange import Exchange
 from .enums.pairs import Pairs
+from .enums.signal import Signal
 from .exchanges import BinanceAPI
 from .exchanges.exchange_provider import ExchangeProvider
 from .solver import Solver
@@ -259,13 +260,13 @@ def get_cdc_template(
         logger.info(f"Ticker ({ticker}) is {signal}")
 
         cleaned_ticker = re.sub(r"[-/_]", "", ticker)
-        if signal == "buy":
+        if signal == Signal.Buy:
             buy_tickers.append(cleaned_ticker)
-        elif signal == "sell":
+        elif signal == Signal.Sell:
             sell_tickers.append(cleaned_ticker)
-        elif signal == "buy more":
+        elif signal == Signal.BuyMore:
             buymore_tickers.append(cleaned_ticker)
-        elif signal == "sell more":
+        elif signal == Signal.SellMore:
             sellmore_tickers.append(cleaned_ticker)
 
     cdc_template: str = (

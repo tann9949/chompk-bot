@@ -34,7 +34,7 @@ class Solver:
         # Buymore sell more
         # todo: check this
         rsi = momentum.rsi(src, 14)
-        stoch_rsi = momentum.stoch(rsi, rsi, rsi, 14).values
+        stoch_rsi = momentum.stoch(rsi, rsi, rsi, 14)
         k = trend.sma_indicator(stoch_rsi, 3)
         d = trend.sma_indicator(k, 3)
         current_kd_diff = k[curr_idx] - d[curr_idx]

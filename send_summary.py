@@ -49,5 +49,4 @@ def main(exchange: str):
 
 
 if __name__ == "__main__":
-    get_cdc_template(Pairs.USDT, Exchange.BINANCE)
-    # main()
+    main()
